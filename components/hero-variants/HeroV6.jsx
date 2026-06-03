@@ -11,21 +11,28 @@ export default function HeroV6() {
   }, []);
 
   return (
-    <section className="min-h-screen bg-black flex flex-col justify-center items-center relative overflow-hidden select-none">
+    <section className="min-h-screen bg-[#020202] flex flex-col justify-center items-center relative overflow-hidden select-none font-inter">
       
-      {/* Fallback background if GIF fails to load or before hydration */}
-      <div className="absolute inset-0 bg-[#07070a] z-0" />
+      {/* Film Grain Overlay */}
+      <div 
+        className="absolute inset-0 z-50 pointer-events-none opacity-[0.04] mix-blend-overlay"
+        style={{ backgroundImage: "url('https://upload.wikimedia.org/wikipedia/commons/7/76/1k_Dissolve_Noise_Texture.png')" }}
+      />
+
+      <div className="absolute inset-0 bg-[#020202] z-0" />
 
       {/* Massive Video Masked Text */}
       <div className="relative z-10 w-full flex justify-center items-center h-screen mix-blend-screen pointer-events-none">
         {mounted && (
           <h1 
-            className="font-inter text-[150px] sm:text-[250px] lg:text-[380px] leading-[0.8] font-black uppercase tracking-tighter text-transparent bg-clip-text"
+            className="font-inter text-[120px] sm:text-[200px] lg:text-[320px] xl:text-[400px] leading-[0.75] font-black uppercase tracking-tighter text-transparent bg-clip-text"
             style={{
-              backgroundImage: "url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExOHoxM2w0bjhsbjFsaWVqZnJwOWRkbDFqb2Z2c3Uxa3c4dW84bzB0dSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/kC8N6DPOkbqWTxkNTe/giphy.gif')",
+              // Using a high-quality sports/action aesthetic GIF 
+              backgroundImage: "url('https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMjRwbG1iZDNjc2QxeG5tdnV1dDhhbWdmbHRhMzNxZWt5NzB2MndhOSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/3oz8xBSs6cGGgqQsn6/giphy.gif')",
               backgroundSize: "cover",
-              backgroundPosition: "center",
-              WebkitBackgroundClip: "text"
+              backgroundPosition: "center 40%",
+              WebkitBackgroundClip: "text",
+              filter: "contrast(1.2) saturate(1.1) brightness(1.3)"
             }}
           >
             DECODED
@@ -33,31 +40,31 @@ export default function HeroV6() {
         )}
       </div>
 
-      {/* Elegant Overlays */}
-      <div className="absolute top-0 left-0 w-full p-8 md:p-12 flex justify-between items-start z-20">
-        <div className="font-mono text-xs uppercase tracking-[0.3em] text-[#8e8e9f]">
-          FIFA World Cup 2026
+      {/* Ultra-refined Navigation Overlay */}
+      <div className="absolute top-0 left-0 w-full p-8 flex justify-between items-start z-20 mix-blend-difference">
+        <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-white/80">
+          Project 2026
         </div>
-        <div className="font-mono text-xs uppercase tracking-[0.3em] text-[#8e8e9f]">
-          Watsonx AI Engine
+        <div className="font-mono text-[9px] uppercase tracking-[0.4em] text-white/80">
+          Powered by IBM Granite
         </div>
       </div>
 
       {/* Center Action */}
-      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-6">
-        <p className="font-inter text-sm md:text-base text-[#8e8e9f] max-w-md text-center font-medium leading-relaxed">
-          Tactics, pressure, and VAR decisions — finally decoded by IBM Granite.
+      <div className="absolute bottom-16 left-1/2 -translate-x-1/2 z-20 flex flex-col items-center space-y-8 mix-blend-difference w-full px-6">
+        <p className="font-sans text-xs md:text-sm text-white/70 max-w-md text-center font-medium leading-relaxed tracking-wide">
+          Tactics, psychological pressure, and precise physics — decoded live.
         </p>
-        <div className="flex items-center space-x-6">
-          <Link href="/tactics" className="flex items-center space-x-3 text-white border-b border-white pb-1 hover:text-[#00c2a8] hover:border-[#00c2a8] transition-colors group">
-            <span className="font-inter text-sm font-bold uppercase tracking-wider">Explore Platform</span>
-            <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+        <div className="flex items-center space-x-8">
+          <Link href="/tactics" className="flex items-center space-x-3 text-white border-b border-white/30 pb-1 hover:border-white transition-all group">
+            <span className="font-sans text-[11px] font-bold uppercase tracking-widest">Enter Platform</span>
+            <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
           </Link>
-          <div className="flex items-center space-x-3 text-[#8e8e9f] hover:text-white transition-colors cursor-pointer group">
-            <div className="w-10 h-10 rounded-full border border-[#8e8e9f] flex items-center justify-center group-hover:border-white transition-colors">
-              <Play size={12} className="ml-0.5" />
+          <div className="flex items-center space-x-3 text-white/70 hover:text-white transition-colors cursor-pointer group">
+            <div className="w-8 h-8 rounded-full border border-white/30 flex items-center justify-center group-hover:border-white transition-colors">
+              <Play size={10} className="ml-0.5" />
             </div>
-            <span className="font-inter text-sm font-bold uppercase tracking-wider">Watch Reel</span>
+            <span className="font-sans text-[11px] font-bold uppercase tracking-widest">Watch Trailer</span>
           </div>
         </div>
       </div>
