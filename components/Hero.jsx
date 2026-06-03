@@ -2,16 +2,15 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import Link from "next/link";
-import { Target, Brain, Scale, Trophy, BookOpen, Heart, Cpu, Database, Zap } from "lucide-react";
+import { Target, Brain, Scale, Trophy, BookOpen, Heart, Cpu, Network } from "lucide-react";
 
 // --- ANIMATION HOOKS & UTILS ---
-
 const INSIGHTS = [
-  "Mbappé's Crucible Score of 9.2 rivals Zidane's 2006 Final penalty sequence.",
-  "Argentina's 2022 corner tactics had a 34% higher zone-entry rate than France.",
-  "The Griezmann offside margin was 2.3cm — the closest in World Cup history.",
-  "Penalty takers who wait >60s face a 19% higher cortisol spike per IBM Granite analysis.",
-  "StatsBomb data shows 73% of World Cup goals from corners are won in Zone 6.",
+  "[SYS] Mbappé Crucible Score 9.2 // Outperforms Zidane '06",
+  "[SYS] ARG Corner Entry Rate +34% // Exploit Zone 6 detected",
+  "[SAOT] Margin: 2.3cm // Griezmann Offside Call Verified",
+  "[BIO] Cortisol spike +19% detected on >60s penalty wait",
+  "[DATA] Ingesting StatsBomb Telemetry // 14,258 events mapped",
 ];
 
 function useCountUp(target, duration = 1600, start = false) {
@@ -35,9 +34,14 @@ export default function Hero() {
   const [insightIdx, setInsightIdx] = useState(0);
   const [insightVisible, setInsightVisible] = useState(true);
   const canvasRef = useRef(null);
+  
+  // Mouse tracking for 3D parallax
+  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
+  const targetMouse = useRef({ x: 0.5, y: 0.5 });
+  const currentMouse = useRef({ x: 0.5, y: 0.5 });
 
   useEffect(() => {
-    const t = setTimeout(() => setAnimate(true), 50);
+    const t = setTimeout(() => setAnimate(true), 100);
     return () => clearTimeout(t);
   }, []);
 
@@ -48,91 +52,196 @@ export default function Hero() {
       setTimeout(() => {
         setInsightIdx((i) => (i + 1) % INSIGHTS.length);
         setInsightVisible(true);
-      }, 400);
-    }, 4500);
+      }, 300);
+    }, 4000);
     return () => clearInterval(interval);
   }, []);
 
-  // Canvas Animation Logic
+  // Mouse move listener
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      targetMouse.current = {
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight
+      };
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
+  // ─── 3D ISOMETRIC PITCH CANVAS RENDERER ───
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    let width = canvas.width = canvas.offsetWidth;
-    let height = canvas.height = canvas.offsetHeight;
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
     let animationFrameId;
 
-    // Nodes setup
-    const numNodes = 35;
-    const nodes = Array.from({ length: numNodes }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.4,
-      vy: (Math.random() - 0.5) * 0.4,
-      radius: Math.random() * 2 + 1,
-      pulsePhase: Math.random() * Math.PI * 2,
+    // 3D Nodes (Players)
+    const numNodes = 22;
+    const nodes = Array.from({ length: numNodes }, (_, i) => ({
+      x: (Math.random() - 0.5) * 800, // 3D world X (-400 to 400)
+      z: (Math.random() - 0.5) * 1200, // 3D world Z (depth)
+      y: Math.random() * 50 + 10,     // 3D world Y (height off ground)
+      vx: (Math.random() - 0.5) * 1.5,
+      vz: (Math.random() - 0.5) * 1.5,
+      team: i < 11 ? "#00c2a8" : "#ff3b30",
+      pulse: Math.random() * Math.PI * 2
     }));
 
-    const drawGrid = () => {
-      ctx.strokeStyle = "rgba(0, 194, 168, 0.05)";
-      ctx.lineWidth = 1;
-      const gridSize = 40;
-      for (let x = 0; x <= width; x += gridSize) {
-        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
-      }
-      for (let y = 0; y <= height; y += gridSize) {
-        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
-      }
+    // Math utils for 3D projection
+    const project = (x, y, z, pitchX, pitchY) => {
+      // 1. Rotation around X axis (tilt)
+      const cosX = Math.cos(pitchX);
+      const sinX = Math.sin(pitchX);
+      let y1 = y * cosX - z * sinX;
+      let z1 = y * sinX + z * cosX;
+
+      // 2. Rotation around Y axis (pan)
+      const cosY = Math.cos(pitchY);
+      const sinY = Math.sin(pitchY);
+      let x2 = x * cosY + z1 * sinY;
+      let z2 = -x * sinY + z1 * cosY;
+      let y2 = y1;
+
+      // 3. Perspective projection
+      const fov = 800;
+      const viewerZ = 1200;
+      const scale = fov / (viewerZ + z2);
+
+      return {
+        x: x2 * scale + width / 2,
+        y: -y2 * scale + height / 2 + 100, // Offset down slightly
+        scale: scale,
+        z: z2 // for depth sorting
+      };
     };
 
     const render = () => {
-      ctx.fillStyle = "#07070a";
+      // Smooth mouse interpolation
+      currentMouse.current.x += (targetMouse.current.x - currentMouse.current.x) * 0.05;
+      currentMouse.current.y += (targetMouse.current.y - currentMouse.current.y) * 0.05;
+
+      ctx.fillStyle = "#030305";
       ctx.fillRect(0, 0, width, height);
-      drawGrid();
 
-      // Update & draw nodes
-      for (let i = 0; i < numNodes; i++) {
-        const node = nodes[i];
-        node.x += node.vx;
-        node.y += node.vy;
+      // Camera angles based on mouse
+      const rotX = 1.2 - currentMouse.current.y * 0.4; // Tilt (0.8 to 1.2 radians)
+      const rotY = (currentMouse.current.x - 0.5) * 0.6; // Pan (-0.3 to 0.3 rad)
+
+      // Draw Pitch Ground Grid
+      ctx.lineWidth = 1;
+      const gridSteps = 14;
+      const pitchW = 1000;
+      const pitchL = 1500;
+      
+      // Ground plane passes
+      for (let pass = 0; pass < 2; pass++) {
+        ctx.strokeStyle = pass === 0 ? "rgba(43, 102, 255, 0.08)" : "rgba(0, 194, 168, 0.15)";
+        if (pass === 1) ctx.globalCompositeOperation = "screen";
+
+        // Vertical lines
+        for (let i = 0; i <= gridSteps; i++) {
+          const gx = -pitchW/2 + (pitchW/gridSteps) * i;
+          const p1 = project(gx, 0, -pitchL/2, rotX, rotY);
+          const p2 = project(gx, 0, pitchL/2, rotX, rotY);
+          ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+        }
+        // Horizontal lines
+        for (let i = 0; i <= gridSteps; i++) {
+          const gz = -pitchL/2 + (pitchL/gridSteps) * i;
+          const p1 = project(-pitchW/2, 0, gz, rotX, rotY);
+          const p2 = project(pitchW/2, 0, gz, rotX, rotY);
+          ctx.beginPath(); ctx.moveTo(p1.x, p1.y); ctx.lineTo(p2.x, p2.y); ctx.stroke();
+        }
+      }
+      ctx.globalCompositeOperation = "source-over";
+
+      // Draw Center Circle & Penalty Boxes (Faux 3D)
+      ctx.strokeStyle = "rgba(43, 102, 255, 0.2)";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      for(let a=0; a<=Math.PI*2; a+=0.1) {
+        const p = project(Math.cos(a)*150, 0, Math.sin(a)*150, rotX, rotY);
+        if(a===0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+
+      // Update and project nodes
+      nodes.forEach(n => {
+        n.x += n.vx;
+        n.z += n.vz;
+        if(n.x > pitchW/2 || n.x < -pitchW/2) n.vx *= -1;
+        if(n.z > pitchL/2 || n.z < -pitchL/2) n.vz *= -1;
         
-        // Bounce edges
-        if (node.x < 0 || node.x > width) node.vx *= -1;
-        if (node.y < 0 || node.y > height) node.vy *= -1;
+        // Bobbing effect
+        n.pulse += 0.05;
+        n.y = 30 + Math.sin(n.pulse) * 15;
+        
+        n.proj = project(n.x, n.y, n.z, rotX, rotY);
+        n.projGround = project(n.x, 0, n.z, rotX, rotY);
+      });
 
-        node.pulsePhase += 0.05;
-        const currentRadius = node.radius + Math.sin(node.pulsePhase) * 1;
+      // Sort nodes by depth (z-index in 3D)
+      nodes.sort((a,b) => b.proj.z - a.proj.z);
 
-        // Draw node
-        ctx.beginPath();
-        ctx.arc(node.x, node.y, currentRadius > 0 ? currentRadius : 0, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(0, 194, 168, 0.8)";
-        ctx.fill();
-
-        // Draw connections
-        for (let j = i + 1; j < numNodes; j++) {
-          const other = nodes[j];
-          const distSq = (node.x - other.x)**2 + (node.y - other.y)**2;
-          const maxDist = 120;
-          if (distSq < maxDist * maxDist) {
-            const opacity = 1 - Math.sqrt(distSq) / maxDist;
+      // Draw Connections (Passing network)
+      ctx.lineWidth = 1;
+      for(let i=0; i<nodes.length; i++) {
+        for(let j=i+1; j<nodes.length; j++) {
+          const dx = nodes[i].x - nodes[j].x;
+          const dz = nodes[i].z - nodes[j].z;
+          const dist = Math.sqrt(dx*dx + dz*dz);
+          if (dist < 250 && nodes[i].team === nodes[j].team) {
+            const opacity = (1 - dist/250) * 0.4;
+            ctx.strokeStyle = `${nodes[i].team}${Math.floor(opacity*255).toString(16).padStart(2,'0')}`;
             ctx.beginPath();
-            ctx.moveTo(node.x, node.y);
-            ctx.lineTo(other.x, other.y);
-            ctx.strokeStyle = `rgba(0, 194, 168, ${opacity * 0.4})`;
-            ctx.lineWidth = 0.8;
+            ctx.moveTo(nodes[i].proj.x, nodes[i].proj.y);
+            ctx.lineTo(nodes[j].proj.x, nodes[j].proj.y);
             ctx.stroke();
           }
         }
       }
+
+      // Draw Nodes
+      nodes.forEach(n => {
+        if(n.proj.scale < 0) return; // Behind camera
+        
+        // Ground shadow
+        ctx.fillStyle = "rgba(0,0,0,0.8)";
+        ctx.beginPath();
+        ctx.ellipse(n.projGround.x, n.projGround.y, 8*n.proj.scale, 4*n.proj.scale, 0, 0, Math.PI*2);
+        ctx.fill();
+
+        // Vertical drop line to ground
+        ctx.strokeStyle = "rgba(255,255,255,0.1)";
+        ctx.beginPath(); ctx.moveTo(n.proj.x, n.proj.y); ctx.lineTo(n.projGround.x, n.projGround.y); ctx.stroke();
+
+        // Node circle
+        ctx.fillStyle = n.team;
+        ctx.beginPath();
+        ctx.arc(n.proj.x, n.proj.y, 4 * n.proj.scale, 0, Math.PI*2);
+        ctx.fill();
+
+        // Glowing aura
+        const gradient = ctx.createRadialGradient(n.proj.x, n.proj.y, 0, n.proj.x, n.proj.y, 15 * n.proj.scale);
+        gradient.addColorStop(0, `${n.team}88`);
+        gradient.addColorStop(1, "rgba(0,0,0,0)");
+        ctx.fillStyle = gradient;
+        ctx.beginPath();
+        ctx.arc(n.proj.x, n.proj.y, 15 * n.proj.scale, 0, Math.PI*2);
+        ctx.fill();
+      });
+
       animationFrameId = requestAnimationFrame(render);
     };
 
     render();
 
     const handleResize = () => {
-      width = canvas.width = canvas.offsetWidth;
-      height = canvas.height = canvas.offsetHeight;
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
     };
     window.addEventListener("resize", handleResize);
 
@@ -144,223 +253,127 @@ export default function Hero() {
 
   // Stats Counters
   const eventsAnalyzed = useCountUp(14258, 2000, animate);
-  const modelsDeployed = useCountUp(5, 1200, animate);
-  const activeQueries = useCountUp(89, 1500, animate);
+  const computeNodes = useCountUp(284, 1500, animate);
 
   return (
-    <section className="min-h-screen bg-[#07070a] flex flex-col lg:flex-row items-stretch select-none overflow-hidden relative pt-[52px]">
+    <section className="min-h-screen bg-[#030305] flex items-center justify-center select-none overflow-hidden relative">
       
-      {/* ── LEFT COLUMN: Dashboard Content ── */}
-      <div className="w-full lg:w-[50%] flex flex-col justify-center p-8 sm:p-12 md:p-20 relative z-20">
-        <div className="max-w-xl space-y-7">
+      {/* ── BACKGROUND 3D CANVAS ── */}
+      <canvas ref={canvasRef} className="absolute inset-0 w-full h-full z-0" />
+
+      {/* ── VIGNETTE / SHADING ── */}
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_transparent_0%,_#030305_100%)] z-10 pointer-events-none opacity-80" />
+
+      {/* ── FOREGROUND CONTENT ── */}
+      <div className="relative z-20 w-full max-w-7xl mx-auto px-6 sm:px-12 lg:px-24 flex flex-col justify-center h-full pt-[52px] pointer-events-none">
+        
+        {/* Massive Glitch Typography */}
+        <div className="w-full relative">
           
-          {/* Badge */}
-          <div className={`transition-all duration-700 delay-[0ms] ${
-            animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+          <div className={`transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] delay-[100ms] ${
+            animate ? "opacity-100 translate-y-0 scale-100 blur-0" : "opacity-0 translate-y-12 scale-95 blur-md"
           }`}>
-            <span className="inline-flex items-center space-x-1.5 bg-[#ffd700]/10 border border-[#ffd700]/30 text-[#ffd700] text-[9px] font-inter font-black uppercase tracking-[0.2em] px-3 py-1 rounded">
-              <Trophy size={9} />
-              <span>FIFA World Cup 2026 · AI Platform</span>
+            <span className="inline-flex items-center space-x-2 bg-black/40 backdrop-blur-xl border border-[#00c2a8]/30 text-[#00c2a8] text-[9px] font-mono font-black uppercase tracking-[0.3em] px-4 py-1.5 rounded-full mb-6 pointer-events-auto">
+              <Network size={10} />
+              <span>System Online // FIFA 2026 Core</span>
             </span>
           </div>
 
-          {/* Headline with pseudo-glitch */}
-          <div className="space-y-1 relative group cursor-default">
-            <h1
-              className={`font-teko text-[70px] sm:text-[100px] leading-[0.8] text-white tracking-tighter uppercase font-black transition-all duration-700 delay-100 ${
-                animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              DECODED
-            </h1>
-            <h2
-              className={`font-teko text-[16px] sm:text-[20px] text-[#00c2a8] uppercase tracking-[0.2em] font-semibold transition-all duration-700 delay-200 ${
-                animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-              }`}
-            >
-              Tactical AI &amp; Law Explainers
-            </h2>
-          </div>
-
-          {/* Intro Text */}
-          <p
-            className={`font-inter text-[13px] sm:text-[15px] text-[#8e8e9f] leading-relaxed transition-all duration-700 delay-300 ${
-              animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            Tactics, pressure, and VAR decisions — finally explained by AI. 
-            Powered by IBM Granite, Docling, and StatsBomb open data to bring clarity to 6 billion fans.
-          </p>
-
-          {/* Live AI Insight Ticker */}
-          <div
-            className={`transition-all duration-700 delay-[350ms] bg-[#0c0c12] border border-[#1a1a2e] rounded-xl p-4 relative overflow-hidden ${
-              animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            <div className="flex items-center space-x-2 mb-2">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#00c2a8] opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-[#00c2a8]"></span>
-              </span>
-              <span className="font-inter text-[9px] font-black uppercase tracking-[0.2em] text-[#00c2a8]">LIVE AI INSIGHT</span>
-              <span className="ml-auto font-inter text-[8px] text-[#44445c] font-bold uppercase tracking-wider">IBM Granite 3.3</span>
-            </div>
-            <p
-              className="font-inter text-[12px] sm:text-[13px] text-[#c8c8d8] leading-snug font-medium transition-opacity duration-400 min-h-[40px]"
-              style={{ opacity: insightVisible ? 1 : 0 }}
-            >
-              &ldquo;{INSIGHTS[insightIdx]}&rdquo;
-            </p>
-            {/* Progress dots */}
-            <div className="flex space-x-1.5 mt-3">
-              {INSIGHTS.map((_, i) => (
-                <span
-                  key={i}
-                  className={`h-0.5 rounded-full transition-all duration-300 ${
-                    i === insightIdx ? "w-4 bg-[#00c2a8]" : "w-1.5 bg-[#222232]"
-                  }`}
-                />
-              ))}
-            </div>
-          </div>
-
-          {/* 5 Feature Cards */}
-          <div
-            className={`grid grid-cols-3 sm:grid-cols-5 gap-2 transition-all duration-700 delay-[400ms] ${
-              animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            <Link href="/tactics" className="bg-[#0f0f15]/80 hover:bg-[#181822] border border-[#222232] rounded-xl p-3 transition-all hover:border-[#00c2a8]/40 hover:-translate-y-1 group">
-              <Target size={16} className="text-[#00c2a8] mb-1.5 group-hover:scale-110 transition-transform" />
-              <span className="font-teko text-[13px] text-white tracking-wider block uppercase">Tactics AI</span>
-            </Link>
-            <Link href="/pressure" className="bg-[#0f0f15]/80 hover:bg-[#181822] border border-[#222232] rounded-xl p-3 transition-all hover:border-[#ffd700]/40 hover:-translate-y-1 group">
-              <Brain size={16} className="text-[#ffd700] mb-1.5 group-hover:scale-110 transition-transform" />
-              <span className="font-teko text-[13px] text-white tracking-wider block uppercase">Stress DNA</span>
-            </Link>
-            <Link href="/vardict" className="bg-[#0f0f15]/80 hover:bg-[#181822] border border-[#222232] rounded-xl p-3 transition-all hover:border-[#ff3b30]/40 hover:-translate-y-1 group">
-              <Scale size={16} className="text-[#ff3b30] mb-1.5 group-hover:scale-110 transition-transform" />
-              <span className="font-teko text-[13px] text-white tracking-wider block uppercase">VARdict</span>
-            </Link>
-            <Link href="/laws" className="bg-[#0f0f15]/80 hover:bg-[#181822] border border-[#222232] rounded-xl p-3 transition-all hover:border-[#2b66ff]/40 hover:-translate-y-1 group">
-              <BookOpen size={16} className="text-[#2b66ff] mb-1.5 group-hover:scale-110 transition-transform" />
-              <span className="font-teko text-[13px] text-white tracking-wider block uppercase">Ask Ref</span>
-            </Link>
-            <Link href="/drama" className="bg-[#0f0f15]/80 hover:bg-[#181822] border border-[#222232] rounded-xl p-3 transition-all hover:border-[#ff3b30]/40 hover:-translate-y-1 group">
-              <Heart size={16} className="text-[#ff3b30] mb-1.5 group-hover:scale-110 transition-transform" />
-              <span className="font-teko text-[13px] text-white tracking-wider block uppercase">Drama</span>
-            </Link>
-          </div>
-
-          {/* CTA Row */}
-          <div
-            className={`flex flex-wrap items-center gap-4 transition-all duration-700 delay-500 pt-2 ${
-              animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
-            }`}
-          >
-            <Link
-              href="/tactics"
-              className="inline-flex bg-white hover:bg-[#00c2a8] text-black hover:text-white font-teko text-[16px] tracking-widest font-bold px-8 py-3 rounded-full uppercase items-center space-x-2 transition-all duration-300 shadow-[0_0_20px_rgba(0,194,168,0)] hover:shadow-[0_0_20px_rgba(0,194,168,0.4)] active:scale-95 group"
-            >
-              <span>ENTER THE PLATFORM</span>
-              <span className="text-[14px] font-sans group-hover:translate-x-1 transition-transform">→</span>
-            </Link>
-            
-            <div className="flex items-center space-x-4 ml-2">
-              <div className="flex flex-col">
-                <span className="font-teko text-[22px] text-white font-bold leading-none">{eventsAnalyzed.toLocaleString()}</span>
-                <span className="font-inter text-[8px] text-[#8e8e9f] uppercase tracking-wider font-bold">Events Parsed</span>
-              </div>
-              <div className="w-px h-6 bg-[#222232]"></div>
-              <div className="flex flex-col">
-                <span className="font-teko text-[22px] text-white font-bold leading-none">{modelsDeployed}</span>
-                <span className="font-inter text-[8px] text-[#8e8e9f] uppercase tracking-wider font-bold">AI Modules</span>
-              </div>
-            </div>
-          </div>
-
-        </div>
-      </div>
-
-      {/* ── RIGHT COLUMN: Cyber-Tactical Grid ── */}
-      <div className="hidden lg:block w-[50%] relative overflow-hidden bg-[#050508] border-l border-[#1a1a2e] z-10">
-        
-        {/* Background Canvas */}
-        <canvas ref={canvasRef} className="absolute inset-0 w-full h-full opacity-60" />
-
-        {/* Right Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#07070a] via-transparent to-transparent z-10"></div>
-        <div className="absolute inset-0 bg-gradient-to-t from-[#07070a] via-transparent to-transparent z-10"></div>
-
-        {/* Floating Tech Badges / Widgets */}
-        <div className="absolute inset-0 z-20 pointer-events-none">
+          <h1 className={`font-teko text-[100px] sm:text-[160px] lg:text-[220px] leading-[0.75] font-black tracking-tighter uppercase text-transparent bg-clip-text bg-gradient-to-br from-white via-gray-200 to-gray-600 transition-all duration-1000 ease-[cubic-bezier(0.16,1,0.3,1)] delay-200 ${
+            animate ? "opacity-100 translate-x-0 blur-0" : "opacity-0 -translate-x-12 blur-lg"
+          }`}
+          style={{ WebkitTextStroke: "1px rgba(255,255,255,0.1)" }}>
+            DECODED
+          </h1>
           
-          {/* SAOT Widget */}
-          <div className={`absolute top-24 right-16 bg-black/60 backdrop-blur-md border border-[#ff3b30]/30 p-4 rounded-xl shadow-2xl transition-all duration-[1s] delay-700 ${
-            animate ? "opacity-100 translate-x-0" : "opacity-0 translate-x-8"
+          <h2 className={`font-teko text-[20px] sm:text-[28px] lg:text-[36px] text-[#2b66ff] uppercase tracking-[0.25em] font-semibold mt-2 transition-all duration-1000 delay-[350ms] ${
+            animate ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-8"
           }`}>
-            <div className="flex items-center space-x-2 mb-2">
-              <Cpu size={12} className="text-[#ff3b30]" />
-              <span className="text-[9px] text-[#ff3b30] font-inter font-black uppercase tracking-widest">SAOT Engine</span>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center space-x-8 text-[10px] font-mono">
-                <span className="text-[#8e8e9f]">Mesh Calibration</span>
-                <span className="text-[#00c2a8]">OK</span>
-              </div>
-              <div className="flex justify-between items-center space-x-8 text-[10px] font-mono">
-                <span className="text-[#8e8e9f]">Offside Margin</span>
-                <span className="text-white">2.3cm</span>
-              </div>
+            Advanced Tactical AI & Law Analysis
+          </h2>
+        </div>
+
+        {/* Dynamic Data Row */}
+        <div className="mt-12 flex flex-col lg:flex-row items-start lg:items-end justify-between w-full gap-8 pointer-events-auto">
+          
+          {/* Action Area */}
+          <div className="flex flex-col space-y-6">
+            <p className={`font-inter text-[14px] sm:text-[16px] text-[#8e8e9f] max-w-md leading-relaxed transition-all duration-1000 delay-500 ${
+              animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}>
+              Tactics, pressure, and VAR decisions completely stripped down and explained by Watsonx.ai and StatsBomb open data.
+            </p>
+            
+            <div className={`flex items-center space-x-4 transition-all duration-1000 delay-[600ms] ${
+              animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+            }`}>
+              <Link
+                href="/tactics"
+                className="group relative inline-flex items-center justify-center bg-white text-black font-teko text-[18px] tracking-widest font-bold px-10 py-3.5 rounded-sm uppercase transition-all overflow-hidden"
+              >
+                <div className="absolute inset-0 bg-[#00c2a8] translate-y-[100%] group-hover:translate-y-0 transition-transform duration-300 ease-out"></div>
+                <span className="relative z-10 group-hover:text-white transition-colors duration-300 flex items-center space-x-2">
+                  <span>Enter Platform</span>
+                  <span className="font-sans text-[14px] group-hover:translate-x-1 transition-transform">→</span>
+                </span>
+              </Link>
             </div>
           </div>
 
-          {/* Data Processing Widget */}
-          <div className={`absolute bottom-32 left-12 bg-black/60 backdrop-blur-md border border-[#2b66ff]/30 p-4 rounded-xl shadow-2xl transition-all duration-[1s] delay-1000 ${
+          {/* Glassmorphic Ticker & Stats */}
+          <div className={`flex flex-col space-y-4 w-full lg:w-[450px] transition-all duration-1000 delay-[700ms] ${
             animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
           }`}>
-            <div className="flex items-center space-x-2 mb-2">
-              <Database size={12} className="text-[#2b66ff]" />
-              <span className="text-[9px] text-[#2b66ff] font-inter font-black uppercase tracking-widest">StatsBomb Feed</span>
-            </div>
-            <div className="space-y-1.5">
-              <div className="flex items-center space-x-2">
-                <div className="w-full bg-[#111118] h-1.5 rounded-full overflow-hidden w-24">
-                  <div className="bg-[#2b66ff] w-[75%] h-full"></div>
-                </div>
-                <span className="text-[9px] font-mono text-[#8e8e9f]">75%</span>
+            
+            {/* Ticker */}
+            <div className="bg-black/30 backdrop-blur-2xl border border-white/10 rounded-lg p-4 shadow-2xl relative overflow-hidden group hover:border-[#2b66ff]/50 transition-colors">
+              <div className="absolute top-0 left-0 w-1 h-full bg-[#2b66ff]"></div>
+              <div className="flex items-center space-x-2 mb-2">
+                <span className="relative flex h-1.5 w-1.5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#2b66ff] opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-[#2b66ff]"></span>
+                </span>
+                <span className="font-mono text-[9px] text-[#2b66ff] font-bold uppercase tracking-[0.2em]">Live Telemetry</span>
               </div>
-              <div className="text-[9px] font-mono text-[#8e8e9f] mt-1">Ingesting match telemetry...</div>
+              <p className="font-mono text-[11px] text-[#c8c8d8] leading-relaxed min-h-[36px]" style={{ opacity: insightVisible ? 1 : 0, transition: "opacity 0.3s" }}>
+                {INSIGHTS[insightIdx]}
+              </p>
             </div>
-          </div>
 
-          {/* RAG Widget */}
-          <div className={`absolute top-[45%] right-24 bg-black/60 backdrop-blur-md border border-[#ffd700]/30 p-3 rounded-xl shadow-2xl transition-all duration-[1s] delay-[1300ms] ${
-            animate ? "opacity-100 scale-100" : "opacity-0 scale-90"
-          }`}>
-            <div className="flex items-center space-x-2">
-              <Zap size={12} className="text-[#ffd700]" />
-              <div className="flex flex-col">
-                <span className="text-[9px] text-[#ffd700] font-inter font-black uppercase tracking-widest">Docling RAG</span>
-                <span className="text-[8px] font-mono text-[#8e8e9f]">Law 11 / Offside</span>
+            {/* Micro Stats */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="bg-black/20 backdrop-blur-xl border border-white/5 rounded-lg p-3">
+                <div className="font-teko text-[32px] text-white leading-none font-bold">{eventsAnalyzed.toLocaleString()}</div>
+                <div className="font-mono text-[8px] text-[#8e8e9f] uppercase tracking-widest mt-1">Events Parsed</div>
+              </div>
+              <div className="bg-black/20 backdrop-blur-xl border border-white/5 rounded-lg p-3">
+                <div className="font-teko text-[32px] text-white leading-none font-bold">{computeNodes}</div>
+                <div className="font-mono text-[8px] text-[#8e8e9f] uppercase tracking-widest mt-1">Active AI Nodes</div>
               </div>
             </div>
-          </div>
 
-          {/* Center Graphic Title */}
-          <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center transition-all duration-[1.5s] delay-300 ${
-            animate ? "opacity-30 blur-0 scale-100" : "opacity-0 blur-xl scale-110"
-          }`}>
-            <div className="font-teko text-[180px] leading-[0.75] font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-[#050508] tracking-tighter">
-              2026
-            </div>
           </div>
+        </div>
 
+        {/* Bottom Feature Navigation */}
+        <div className={`mt-16 border-t border-white/10 pt-6 flex flex-wrap gap-4 transition-all duration-1000 delay-[900ms] pointer-events-auto ${
+          animate ? "opacity-100 translate-y-0" : "opacity-0 translate-y-8"
+        }`}>
+          {[
+            { name: "Tactics", icon: Target, color: "#00c2a8", link: "/tactics" },
+            { name: "Stress DNA", icon: Brain, color: "#ffd700", link: "/pressure" },
+            { name: "VARdict", icon: Scale, color: "#ff3b30", link: "/vardict" },
+            { name: "Ask Ref", icon: BookOpen, color: "#2b66ff", link: "/laws" },
+            { name: "Drama", icon: Heart, color: "#ff3b30", link: "/drama" },
+          ].map((f, i) => (
+            <Link key={f.name} href={f.link} className="flex items-center space-x-2 text-[#8e8e9f] hover:text-white transition-colors group">
+              <f.icon size={13} style={{ color: f.color }} className="group-hover:scale-110 transition-transform" />
+              <span className="font-teko text-[14px] uppercase tracking-widest">{f.name}</span>
+            </Link>
+          ))}
         </div>
 
       </div>
-
     </section>
   );
 }
