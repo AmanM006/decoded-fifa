@@ -1,0 +1,124 @@
+"use client";
+
+import React, { useEffect, useState } from "react";
+
+export default function PressureGauge({ score = 5.0, playerName = "Player", matchContext = "Match" }) {
+  const [animatedScore, setAnimatedScore] = useState(0);
+
+  useEffect(() => {
+    let start = 0;
+    const duration = 1500;
+    const stepTime = 30;
+    const steps = duration / stepTime;
+    const increment = score / steps;
+
+    const timer = setInterval(() => {
+      start += increment;
+      if (start >= score) {
+        clearInterval(timer);
+        setAnimatedScore(score);
+      } else {
+        setAnimatedScore(parseFloat(start.toFixed(1)));
+      }
+    }, stepTime);
+
+    return () => clearInterval(timer);
+  }, [score]);
+
+  // Color mapping matching UI redesign
+  const getColor = (val) => {
+    if (val <= 3.0) return "#00c2a8"; // pitch teal
+    if (val <= 6.0) return "#ffd700"; // gold
+    if (val <= 9.0) return "#ff6f00"; // orange
+    return "#ff3b30"; // bright red
+  };
+
+  const currentColor = getColor(score);
+  
+  const radius = 90;
+  const circumference = Math.PI * radius;
+  const strokeDashoffset = circumference - (animatedScore / 10) * circumference;
+  const rotationAngle = -180 + (animatedScore / 10) * 180;
+
+  return (
+    <div className="flex flex-col items-center select-none font-inter">
+      <div className="relative w-[280px] h-[170px] flex items-center justify-center overflow-hidden">
+        
+        {/* Speedometer SVG */}
+        <svg width="240" height="150" viewBox="0 0 240 150" className="absolute top-0">
+          <defs>
+            <linearGradient id="gaugeGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#00c2a8" />
+              <stop offset="40%" stopColor="#ffd700" />
+              <stop offset="80%" stopColor="#ff6f00" />
+              <stop offset="100%" stopColor="#ff3b30" />
+            </linearGradient>
+          </defs>
+
+          {/* Background track */}
+          <path
+            d="M 30 120 A 90 90 0 0 1 210 120"
+            stroke="#1c1c28"
+            strokeWidth="12"
+            fill="none"
+            strokeLinecap="round"
+          />
+
+          {/* Colored active arc */}
+          <path
+            d="M 30 120 A 90 90 0 0 1 210 120"
+            stroke="url(#gaugeGradient)"
+            strokeWidth="12"
+            fill="none"
+            strokeLinecap="round"
+            strokeDasharray={circumference}
+            strokeDashoffset={strokeDashoffset}
+            className="transition-all duration-[1.5s] ease-out"
+          />
+
+          {/* Center spindle — small, dark, no colored dot */}
+          <circle cx="120" cy="120" r="6" fill="#0f0f15" stroke="#222232" strokeWidth="1.5" />
+
+          {/* Needle */}
+          <g
+            transform={`rotate(${rotationAngle} 120 120)`}
+            className="transition-transform duration-[1.5s] cubic-bezier(0.16, 1, 0.3, 1)"
+            style={{ transformOrigin: "120px 120px" }}
+          >
+            <path d="M 40 120 L 115 116 L 120 120 L 115 124 Z" fill="#ffffff" />
+            <path d="M 40 120 L 115 116 L 117 120 Z" fill={currentColor} />
+          </g>
+
+        </svg>
+
+        {/* Text score container overlay inside arc */}
+        <div className="absolute top-[65px] flex flex-col items-center">
+          <div className="flex items-baseline justify-center">
+            <span
+              className={`font-teko text-[72px] font-black leading-none tracking-tighter ${
+                score >= 9.0 ? "animate-pulse" : ""
+              }`}
+              style={{ color: currentColor }}
+            >
+              {animatedScore.toFixed(1)}
+            </span>
+            <span className="font-teko text-[28px] text-[#8e8e9f] ml-1 font-semibold leading-none">/ 10</span>
+          </div>
+          <span className="font-inter text-[9px] text-[#8e8e9f] uppercase tracking-widest font-bold mt-1">
+            CRUCIBLE SCORE
+          </span>
+        </div>
+      </div>
+
+      {/* Player and match context labels */}
+      <div className="text-center mt-3">
+        <h3 className="font-teko text-[32px] text-white tracking-widest leading-none uppercase font-black">
+          {playerName}
+        </h3>
+        <p className="font-inter text-[12.5px] text-[#8e8e9f] mt-1 max-w-[260px] truncate uppercase font-semibold">
+          {matchContext}
+        </p>
+      </div>
+    </div>
+  );
+}
