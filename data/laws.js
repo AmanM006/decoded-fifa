@@ -24,6 +24,30 @@ export const FIFA_LAWS = [
     ]
   },
   {
+    id: "law-2",
+    number: 2,
+    title: "The Ball",
+    emoji: "⚽",
+    color: "#00c8ff",
+    summary: "Specifications of the ball, shape, sizing, and replacement.",
+    articles: [
+      {
+        id: "law-2-1",
+        title: "Qualities and Measurements",
+        keywords: ["ball", "pressure", "weight", "circumference", "size 5", "spherical", "leather"],
+        officialText: "The ball must be spherical, made of suitable material, of a circumference of between 68 cm (27 ins) and 70 cm (28 ins), and between 410 g (14 oz) and 450 g (16 oz) in weight at the start of the match. It must have a pressure equal to 0.6–1.1 atmosphere (600–1,100 g/cm²) at sea level.",
+        plainEnglish: "All professional matches use a standard Size 5 ball. It must be a perfect sphere, weigh between 410g and 450g, and be inflated to a specific pressure range. If it's too soft or too hard, players will complain and referees will replace it immediately."
+      },
+      {
+        id: "law-2-2",
+        title: "Defective Ball Replacement",
+        keywords: ["burst", "pop", "punctured", "deflated", "damaged ball", "replace ball", "change ball"],
+        officialText: "If the ball becomes defective during the course of play, play is stopped and restarted by dropping the replacement ball at the place where the original ball became defective, unless play was stopped inside the goal area.",
+        plainEnglish: "If the ball pops, bursts, or deflates mid-play, the referee stops the game immediately, gets a new ball, and restarts with a dropped ball at the spot where it went flat. You don't restart with a free kick or throw-in."
+      }
+    ]
+  },
+  {
     id: "law-3",
     number: 3,
     title: "The Players",
@@ -96,6 +120,30 @@ export const FIFA_LAWS = [
     ]
   },
   {
+    id: "law-6",
+    number: 6,
+    title: "The Other Match Officials",
+    emoji: "🚩",
+    color: "#a855f7",
+    summary: "Linesmen, fourth officials, and Video Match Officials (VAR).",
+    articles: [
+      {
+        id: "law-6-1",
+        title: "Assistant Referees & Fourth Official",
+        keywords: ["linesman", "linesmen", "assistant referee", "fourth official", "board", "timekeeper", "flag"],
+        officialText: "Two assistant referees are appointed to signal when the ball is out of play, which side is entitled to a corner kick, goal kick or throw-in, and when a player is offside. The fourth official supervises substitutions, controls the replacement balls, and indicates the minimum added time.",
+        plainEnglish: "The assistant referees (traditionally linesmen) run the touchlines to call offsides, throw-ins, and corners. The fourth official stands by the benches managing substitutions, referee abuse, and holding up the electronic board showing added time."
+      },
+      {
+        id: "law-6-2",
+        title: "Video Match Officials (VAR)",
+        keywords: ["AVAR", "VAR team", "booth", "replays", "video room", "officials"],
+        officialText: "Video match officials (VAR and AVAR) assist the referee in accordance with the VAR protocol. They review footage of potential game-changing decisions: goals, penalty awards, direct red cards, and mistaken identity.",
+        plainEnglish: "The VAR team sits in a remote video room analyzing broadcast replays from multiple angles. They do not make decisions themselves; they only recommend reviews to the on-field head referee."
+      }
+    ]
+  },
+  {
     id: "law-7",
     number: 7,
     title: "The Duration of the Match",
@@ -116,6 +164,54 @@ export const FIFA_LAWS = [
         keywords: ["stoppage", "added time", "injury time", "extra minutes", "how much time", "why so long", "6 minutes"],
         officialText: "Allowance is made by the referee in each half for all time lost in that half through: substitutions, assessment of injured players, removal of injured players, time wasting, disciplinary sanctions, drinks/cooling breaks, VAR checks, goal celebrations and any other cause.",
         plainEnglish: "The referee adds back all the time wasted — every substitution (30 seconds each), VAR check, goal celebration, injury assessment, and any player who wastes time. Since 2022 Qatar World Cup, FIFA instructed referees to be much stricter, leading to those 8–10 minute stoppage times that shocked everyone. It was always the rule — refs were just finally enforcing it."
+      }
+    ]
+  },
+  {
+    id: "law-8",
+    number: 8,
+    title: "The Start and Restart of Play",
+    emoji: "🏁",
+    color: "#ef4444",
+    summary: "Kick-offs, dropped balls, coin toss, and restarts.",
+    articles: [
+      {
+        id: "law-8-1",
+        title: "Kick-off Procedure",
+        keywords: ["kickoff", "kick off", "coin toss", "start match", "center circle", "restart", "score directly"],
+        officialText: "A coin toss decides which team kicks off or chooses which goal to attack. For the kick-off, all players must be in their own half. Opponents of the kicking team must be at least 9.15m from the ball (outside center circle). A goal may be scored directly from the kick-off against the opponents.",
+        plainEnglish: "The match starts with a coin toss. At kick-off, the ball is placed in the center circle and can be kicked in any direction (including backward). Amazingly, you can score directly from kick-off if you shoot and catch the keeper off-guard!"
+      },
+      {
+        id: "law-8-2",
+        title: "Dropped Ball",
+        keywords: ["dropped ball", "drop ball", "referee ball", "fair play", "restart drop"],
+        officialText: "If the referee stops play and no team is at fault, play is restarted with a dropped ball. The ball is dropped for the defending team goalkeeper in their penalty area if play was stopped in the penalty area or the last touch was in the penalty area. In all other cases, it is dropped for one player of the team that last touched the ball.",
+        plainEnglish: "If play stops because of an external factor (like a fan on the pitch or a referee getting hit), the referee restarts with a dropped ball. Under modern rules, the ball is dropped directly to whichever team had it last. Opposing players must stand 4 meters away, ending the old chaotic 'contested' drop balls."
+      }
+    ]
+  },
+  {
+    id: "law-9",
+    number: 9,
+    title: "The Ball In and Out of Play",
+    emoji: "📉",
+    color: "#10b981",
+    summary: "When the ball is active, inactive, or hits match officials.",
+    articles: [
+      {
+        id: "law-9-1",
+        title: "Ball Out of Play",
+        keywords: ["out of play", "outside", "out of bounds", "touchline", "goal line", "cross line", "entirely over"],
+        officialText: "The ball is out of play when it has wholly passed over the goal line or touch line on the ground or in the air, or when play has been stopped by the referee. It is also out of play if it touches a match official, remains on the field of play, and a team starts a promising attack, the ball goes directly into the goal, or the team in possession changes.",
+        plainEnglish: "The ball is only 'out' when 100% of it has crossed the white line (on the ground or in the air). If even a millimeter of the ball is on the line, it is still active. Also, if the ball hits the referee and possession switches or an attack starts, the ref must stop play and drop the ball."
+      },
+      {
+        id: "law-9-2",
+        title: "Ball In Play",
+        keywords: ["in play", "active ball", "rebound", "post", "referee hit"],
+        officialText: "The ball is in play at all other times, including when it rebounds off a match official, goalpost, crossbar or corner flagpost and remains on the field of play.",
+        plainEnglish: "The ball is active at all times unless the referee blows the whistle or it fully crosses the boundaries. Rebounds off posts, crossbars, corner flags, or officials (without possession changes) are completely live play — keep playing until you hear a whistle!"
       }
     ]
   },
@@ -213,6 +309,30 @@ export const FIFA_LAWS = [
     ]
   },
   {
+    id: "law-13",
+    number: 13,
+    title: "Free Kicks",
+    emoji: "🎯",
+    color: "#f59e0b",
+    summary: "Direct and indirect free kicks, walls, and procedures.",
+    articles: [
+      {
+        id: "law-13-1",
+        title: "Types of Free Kicks",
+        keywords: ["free kick", "direct free kick", "indirect free kick", "procedure", "wall", "distance"],
+        officialText: "Free kicks are direct or indirect. For both, the ball must be stationary when the kick is taken and the kicker must not touch the ball a second time until it has touched another player. If an indirect free kick is kicked directly into the opponents' goal, a goal kick is awarded.",
+        plainEnglish: "There are two free kicks: Direct (you can shoot and score directly) and Indirect (the ball must touch someone else first before crossing the line). If the referee holds their arm straight up in the air, it's indirect — don't shoot directly!"
+      },
+      {
+        id: "law-13-2",
+        title: "The Defensive Wall",
+        keywords: ["wall", "defenders wall", "encroachment wall", "ten yards", "distance wall", "blocking wall"],
+        officialText: "All opponents must be at least 9.15m (10 yards) from the ball until it is in play. Where three or more defending team players form a 'wall', all attacking team players must remain at least 1m from the wall until the ball is in play.",
+        plainEnglish: "Defenders must stand at least 9.15m (10 yards) away from the ball. Also, attackers can't crowd or stand inside the defensive wall to create blocks anymore — they must stay at least 1 meter away from a wall of 3 or more defenders."
+      }
+    ]
+  },
+  {
     id: "law-14",
     number: 14,
     title: "The Penalty Kick",
@@ -233,6 +353,40 @@ export const FIFA_LAWS = [
         keywords: ["goalkeeper", "move", "line", "penalty save", "step off line", "cheat", "retake", "encroachment"],
         officialText: "When the kick is taken, the defending goalkeeper must remain on the goal line, facing the kicker, between the goalposts, until the ball is kicked. The goalkeeper may move along the goal line before the ball is in play.",
         plainEnglish: "The goalkeeper must stay on the goal line until the ball is kicked — but they CAN move sideways along the line. The famous 'goalkeeper off the line' penalty retake only happens if the keeper steps OFF the line (forward or too early). Modern VAR can check this. If the kick is already saved when the infringement is spotted, the keeper keeps the save AND gets a yellow card."
+      }
+    ]
+  },
+  {
+    id: "law-15",
+    number: 15,
+    title: "The Throw-in",
+    emoji: "👐",
+    color: "#14b8a6",
+    summary: "How to properly restart play from the sideline.",
+    articles: [
+      {
+        id: "law-15-1",
+        title: "Throw-in Procedure",
+        keywords: ["throwin", "throw in", "sideline", "foul throw", "overhead", "two feet", "bounds"],
+        officialText: "At the moment of delivering the ball, the thrower must: stand facing the field of play, have part of each foot on the touch line or on the ground outside the touch line, and throw the ball with both hands from behind and over the head from the point where it left the field of play.",
+        plainEnglish: "To take a legal throw-in, you must stand facing the pitch, keep parts of both feet on or behind the line (firmly on the ground), and throw using both hands directly over your head. If you lift a leg or throw from the side of your ear, the ref will call a 'foul throw' and hand the ball to the other team."
+      }
+    ]
+  },
+  {
+    id: "law-16",
+    number: 16,
+    title: "The Goal Kick",
+    emoji: "🦶",
+    color: "#6366f1",
+    summary: "Restarting play after the attacking team hits the ball out.",
+    articles: [
+      {
+        id: "law-16-1",
+        title: "Goal Kick Procedure",
+        keywords: ["goal kick", "six yard box", "six yards", "restart goal", "kick out"],
+        officialText: "The ball is kicked from any point within the goal area by a player of the defending team. The ball is in play when it is kicked and clearly moves. Opponents must be outside the penalty area until the ball is in play.",
+        plainEnglish: "When the attacking team shoots wide, play restarts with a goal kick taken anywhere inside the 6-yard box. Under modern rules, the ball is active as soon as it is kicked and moves — defenders must stay out of the penalty box until it is kicked, but teammates can receive it inside the box to play out from the back."
       }
     ]
   },

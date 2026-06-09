@@ -126,6 +126,16 @@ function drawChart(canvas, match, hoveredMinute, setHoveredMinute) {
   ctx.stroke();
 }
 
+const TEAM_CODES = {
+  "🇫🇷": "FRA",
+  "🇧🇷": "BRA",
+  "🇮🇹": "ITA",
+  "🇩🇪": "GER",
+  "🏴󠁧󠁢󠁥󠁮󠁧󠁿": "ENG",
+  "🇭🇷": "CRO",
+  "🇦🇷": "ARG"
+};
+
 export default function DramaTimeline() {
   const canvasRef = useRef(null);
   const [selectedMatch, setSelectedMatch] = useState(DRAMA_MATCHES[0]);
@@ -209,10 +219,10 @@ export default function DramaTimeline() {
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <span className="text-[18px] shrink-0">{m.flag1}</span>
-                  <span className="text-[10px] text-[#44445c]">vs</span>
-                  <span className="text-[18px] shrink-0">{m.flag2}</span>
-                  <div className="min-w-0">
+                  <span className="text-[11px] font-mono font-bold text-[#8e8e9f] shrink-0 w-8 text-right">{TEAM_CODES[m.flag1] || "???"}</span>
+                  <span className="text-[9px] text-[#44445c] shrink-0">vs</span>
+                  <span className="text-[11px] font-mono font-bold text-[#8e8e9f] shrink-0 w-8 text-left">{TEAM_CODES[m.flag2] || "???"}</span>
+                  <div className="min-w-0 flex-1">
                     <div className="font-inter text-[11px] font-bold text-white truncate">{m.title}</div>
                     <div className="font-inter text-[9px] text-[#44445c] truncate">{m.subtitle.split("·")[1]?.trim()}</div>
                   </div>
