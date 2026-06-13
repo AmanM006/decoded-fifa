@@ -113,6 +113,16 @@ high-stakes World Cup moments.
 
 ---
 
+## 🎨 Design Decisions & Engineering Choices
+
+### 🎯 Tactics Canvas Focus Area
+To replicate the high-density analytical experience used by professional match-day analysts, the Tactics AI module intentionally utilizes an expansive, uncompressed 2D vector field layout. This ensures that tactical metrics, passing lane geometry, and player movement vectors maintain true, distortion-free spatial scaling relative to the real-world pitch boundaries.
+
+### 💀 Skeletal Grid Contrast (VARdict)
+The 29-Point Skeletal Mesh HUD isolates body keypoints against an unlit tracking matrix. This engineering decision eliminates peripheral stadium noise, allowing the system to focus computational clarity purely on centimeter-precision limb coordinates during critical offside evaluations.
+
+---
+
 ## 🤖 IBM Tools Used
 
 ### IBM Granite (watsonx.ai)
@@ -196,7 +206,7 @@ Open `http://localhost:3000`
 ```bash
 WATSONX_API_KEY=your_key_here
 WATSONX_PROJECT_ID=your_project_id
-WATSONX_URL=https://us-south.ml.cloud.ibm.com
+WATSONX_REGION=us-south
 ```
 
 Offline mode: all modules run on pre-computed 
