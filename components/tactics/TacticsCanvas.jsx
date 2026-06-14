@@ -357,40 +357,39 @@ export default function TacticsCanvas({
       }
 
       // 8. Ball trajectory and flight
-      if (isPlaying) {
-        const start = corner.ballStart;
-        const end = { x: target.x, y: target.y };
-        const cp = {
-          x: (start.x + end.x) / 2 - 80,
-          y: (start.y + end.y) / 2 - 90
-        };
+      // Render ball flight always (even when paused) to allow scrubbing the timeline and showing position
+      const start = corner.ballStart;
+      const end = { x: target.x, y: target.y };
+      const cp = {
+        x: (start.x + end.x) / 2 - 80,
+        y: (start.y + end.y) / 2 - 90
+      };
 
-        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-        ctx.lineWidth = 1.5;
-        ctx.setLineDash([4, 4]);
-        ctx.beginPath();
-        ctx.moveTo(start.x, start.y);
-        ctx.quadraticCurveTo(cp.x, cp.y, end.x, end.y);
-        ctx.stroke();
-        ctx.setLineDash([]);
+      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.beginPath();
+      ctx.moveTo(start.x, start.y);
+      ctx.quadraticCurveTo(cp.x, cp.y, end.x, end.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
 
-        const bx = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * cp.x + t * t * end.x;
-        const by = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * cp.y + t * t * end.y;
-        const heightMultiplier = 1 + 6 * Math.sin(t * Math.PI);
+      const bx = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * cp.x + t * t * end.x;
+      const by = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * cp.y + t * t * end.y;
+      const heightMultiplier = 1 + 6 * Math.sin(t * Math.PI);
 
-        ctx.beginPath();
-        ctx.arc(bx, by, 4 + heightMultiplier, 0, Math.PI * 2);
-        ctx.fillStyle = "#ffffff";
-        ctx.fill();
-        ctx.strokeStyle = "#000000";
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
+      ctx.beginPath();
+      ctx.arc(bx, by, 4 + heightMultiplier, 0, Math.PI * 2);
+      ctx.fillStyle = "#ffffff";
+      ctx.fill();
+      ctx.strokeStyle = "#000000";
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
 
-        ctx.beginPath();
-        ctx.arc(bx, by, 1, 0, Math.PI * 2);
-        ctx.fillStyle = "#000";
-        ctx.fill();
-      }
+      ctx.beginPath();
+      ctx.arc(bx, by, 1, 0, Math.PI * 2);
+      ctx.fillStyle = "#000";
+      ctx.fill();
 
       // 9. Outcome overlay label (top right)
       if (isPlaying && t >= 0.95) {

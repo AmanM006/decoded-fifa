@@ -126,7 +126,7 @@ The 29-Point Skeletal Mesh HUD isolates body keypoints against an unlit tracking
 ## 🤖 IBM Tools Used
 
 ### IBM Granite (watsonx.ai)
-`granite-3-3-8b-instruct` powers all five modules:
+`granite-4-1-8b-instruct` powers all five modules:
 - Tactical breakdown narratives (Tactics)
 - Psychological pressure analysis (Pressure)
 - Legal VAR verdicts (VARdict)
