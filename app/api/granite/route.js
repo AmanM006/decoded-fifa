@@ -311,7 +311,7 @@ Key Moments: ${promptData.keyMoments}
           Authorization: `Bearer ${iamToken}`,
         },
         body: JSON.stringify({
-          model_id: "ibm/granite-4-1-8b-instruct",
+          model_id: "ibm/granite-3-3-8b-instruct",
           input: prompt,
           parameters: {
             decoding_method: "greedy",

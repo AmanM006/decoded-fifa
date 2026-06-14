@@ -13,12 +13,12 @@ export async function GET() {
     },
     {
       id: "span-watsonx-inference",
-      name: "watsonx.ai Granite 4.1 Inference",
+      name: "watsonx.ai Granite 3.3 Inference",
       service: "watsonx-text-gen",
       durationMs: 1450,
       timestamp: new Date(Date.now() - 2000).toISOString(),
       status: "SUCCESS",
-      meta: { model: "ibm/granite-4-1-8b-instruct", promptTokens: 412, generatedTokens: 189 }
+      meta: { model: "ibm/granite-3-3-8b-instruct", promptTokens: 412, generatedTokens: 189 }
     },
     {
       id: "span-guardian-gate",

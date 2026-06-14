@@ -55,7 +55,7 @@ export async function GET() {
             Authorization: `Bearer ${iamToken}`,
           },
           body: JSON.stringify({
-            model_id: "ibm/granite-4-1-8b-instruct",
+            model_id: "ibm/granite-3-3-8b-instruct",
             input: "<|user|>\nHello. Output exactly the word 'SUCCESS' if you read this.\n<|assistant|>",
             parameters: {
               decoding_method: "greedy",
@@ -75,7 +75,7 @@ export async function GET() {
 
       return NextResponse.json({
         status: "OK",
-        model: "ibm/granite-4-1-8b-instruct",
+        model: "ibm/granite-3-3-8b-instruct",
         response: text,
         envStatus
       }, { status: 200 });
