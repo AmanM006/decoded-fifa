@@ -6,7 +6,7 @@ export const DRAMA_MATCHES = [
   {
     id: "france-brazil-1998",
     title: "France vs Brazil",
-    subtitle: "1998 World Cup Semi-Final · Stade de France",
+    subtitle: "1998 World Cup Final · Stade de France",
     score: "3 – 0",
     winner: "France",
     attendance: "79,000",

@@ -499,7 +499,7 @@ export default function VARCanvas({ incident, showOffsideLine = true, showCamera
     return () => {
       cancelAnimationFrame(animFrame);
     };
-  }, [incident, showOffsideLine, showCameras, viewMode, aiText]);
+  }, [incident, showOffsideLine, showCameras, viewMode, calibratedOffset, aiText]);
 
   return (
     <div className="flex flex-col items-center select-none w-full">

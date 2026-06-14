@@ -20,7 +20,6 @@ export default function PressureGauge({ score = 5.0, playerName = "Player", matc
   const radius = 90;
   const circumference = Math.PI * radius;
   const strokeDashoffset = circumference - (animatedScore / 10) * circumference;
-  const rotationAngle = -180 + (animatedScore / 10) * 180;
 
   return (
     <div className="flex flex-col items-center select-none font-inter">
@@ -58,18 +57,7 @@ export default function PressureGauge({ score = 5.0, playerName = "Player", matc
             className="transition-all duration-[1.5s] ease-out"
           />
 
-          {/* Center spindle — small, dark, no colored dot */}
-          <circle cx="120" cy="120" r="6" fill="#0f0f15" stroke="#222232" strokeWidth="1.5" />
 
-          {/* Needle */}
-          <g
-            transform={`rotate(${rotationAngle} 120 120)`}
-            className="transition-transform duration-[1.5s] cubic-bezier(0.16, 1, 0.3, 1)"
-            style={{ transformOrigin: "120px 120px" }}
-          >
-            <path d="M 40 120 L 115 116 L 120 120 L 115 124 Z" fill="#ffffff" />
-            <path d="M 40 120 L 115 116 L 117 120 Z" fill={currentColor} />
-          </g>
 
         </svg>
 

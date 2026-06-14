@@ -397,7 +397,7 @@ The AI reasoning engine has failed-closed to prevent rule hallucinations, revert
                     <span className="font-inter text-[9px] text-[#8e8e9f] font-bold uppercase tracking-wider">
                       VAR MANUAL LINE CALIBRATOR
                     </span>
-                    <span className={`font-teko text-[16px] tracking-wider font-bold ${calibratedOffset === 0 ? "text-[#ffd700]" : calibratedOffset > 0 ? "text-red" : "text-green"}`}>
+                    <span className={`font-teko text-[16px] tracking-wider font-bold ${calibratedOffset === 0 ? "text-[#ffd700]" : calibratedOffset > 0 ? "text-[#ff3b30]" : "text-[#00c2a8]"}`}>
                       {calibratedOffset === 0 ? "CALIBRATED (0.0cm)" : `${calibratedOffset > 0 ? "+" : ""}${calibratedOffset.toFixed(1)}cm`}
                     </span>
                   </div>
