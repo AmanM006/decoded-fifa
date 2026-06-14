@@ -200,7 +200,7 @@ The AI reasoning engine has failed-closed to prevent rule hallucinations, revert
             </div>
 
             <p className="text-[12px] text-[#8e8e9f] leading-relaxed mb-4">
-              Queries the `/api/diagnostic` endpoint to verify IAM Token creation and model response from `ibm/granite-4-1-8b-instruct`.
+              Queries the `/api/diagnostic` endpoint to verify IAM Token creation and model response from `ibm/granite-3-8b-instruct`.
             </p>
 
             <div className="space-y-2">
