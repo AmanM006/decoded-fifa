@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect } from "react";
 
-export default function VARCanvas({ incident, showOffsideLine = true, showCameras = true, viewMode = "MATCH", calibratedOffset = 0 }) {
+export default function VARCanvas({ incident, showOffsideLine = true, showCameras = true, viewMode = "MATCH", calibratedOffset = 0, aiText = "" }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
@@ -81,6 +81,42 @@ export default function VARCanvas({ incident, showOffsideLine = true, showCamera
       const data = incident.drawingData;
       const progress = Math.min(1, animProgress);
 
+      const highlightPenaltyBox = aiText && aiText.includes("[HIGHLIGHT: PENALTY_BOX]");
+      const highlightZone14 = aiText && (aiText.includes("[HIGHLIGHT: ZONE_14]") || aiText.includes("[HIGHLIGHT: OFFSIDE_LINE]"));
+      const focusAttacker = aiText && aiText.includes("[FOCUS: ATTACKER]");
+      const focusDefender = aiText && aiText.includes("[FOCUS: DEFENDER]");
+
+      // Draw Highlight Penalty Box if triggered
+      if (highlightPenaltyBox) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 59, 48, 0.8)";
+        ctx.lineWidth = 3 + Math.sin(Date.now() * 0.005) * 1.5;
+        ctx.fillStyle = "rgba(255, 59, 48, 0.06)";
+        ctx.beginPath();
+        ctx.moveTo(W - 40, 50);
+        ctx.lineTo(W - 200, 50);
+        ctx.lineTo(W - 200, H - 50);
+        ctx.lineTo(W - 40, H - 50);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw Highlight Zone 14 / offside area if triggered
+      if (highlightZone14) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 215, 0, 0.8)";
+        ctx.lineWidth = 3 + Math.sin(Date.now() * 0.005) * 1.5;
+        ctx.fillStyle = "rgba(255, 215, 0, 0.06)";
+        ctx.beginPath();
+        const lineX = data.offsideLineX || W / 2;
+        ctx.rect(lineX - 50, 20, 100, H - 40);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
       // 4. Camera calibration cones (Show Cameras toggle)
       if (showCameras) {
         ctx.strokeStyle = "rgba(0,188,212,0.12)";
@@ -128,6 +164,17 @@ export default function VARCanvas({ incident, showOffsideLine = true, showCamera
           const currentX = W / 2 + (attacker.x - W / 2) * progress;
           const currentY = H / 2 + (attacker.y - H / 2) * progress;
 
+          // Focus glow on attacker
+          if (focusAttacker) {
+            ctx.save();
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 2.5 + Math.sin(Date.now() * 0.01) * 1;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 20 + Math.sin(Date.now() * 0.01) * 3, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
+
           ctx.beginPath();
           ctx.arc(currentX, currentY, 12, 0, Math.PI * 2);
           ctx.fillStyle = "#e8002d";
@@ -153,6 +200,17 @@ export default function VARCanvas({ incident, showOffsideLine = true, showCamera
         if (defender) {
           const currentX = W / 2 + (defender.x - W / 2) * progress;
           const currentY = H / 2 + (defender.y - H / 2) * progress;
+
+          // Focus glow on defender
+          if (focusDefender) {
+            ctx.save();
+            ctx.strokeStyle = "#ffd700";
+            ctx.lineWidth = 2.5 + Math.sin(Date.now() * 0.01) * 1;
+            ctx.beginPath();
+            ctx.arc(currentX, currentY, 20 + Math.sin(Date.now() * 0.01) * 3, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.restore();
+          }
 
           ctx.beginPath();
           ctx.arc(currentX, currentY, 12, 0, Math.PI * 2);
@@ -441,7 +499,7 @@ export default function VARCanvas({ incident, showOffsideLine = true, showCamera
     return () => {
       cancelAnimationFrame(animFrame);
     };
-  }, [incident, showOffsideLine, showCameras, viewMode]);
+  }, [incident, showOffsideLine, showCameras, viewMode, aiText]);
 
   return (
     <div className="flex flex-col items-center select-none w-full">

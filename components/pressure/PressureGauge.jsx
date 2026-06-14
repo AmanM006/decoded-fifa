@@ -3,27 +3,9 @@
 import React, { useEffect, useState } from "react";
 
 export default function PressureGauge({ score = 5.0, playerName = "Player", matchContext = "Match" }) {
-  const [animatedScore, setAnimatedScore] = useState(0);
-
-  useEffect(() => {
-    let start = 0;
-    const duration = 1500;
-    const stepTime = 30;
-    const steps = duration / stepTime;
-    const increment = score / steps;
-
-    const timer = setInterval(() => {
-      start += increment;
-      if (start >= score) {
-        clearInterval(timer);
-        setAnimatedScore(score);
-      } else {
-        setAnimatedScore(parseFloat(start.toFixed(1)));
-      }
-    }, stepTime);
-
-    return () => clearInterval(timer);
-  }, [score]);
+  // Set score immediately for instant response on scrubbing sliders
+  const animatedScore = score;
+  const currentScoreStr = animatedScore.toFixed(1);
 
   // Color mapping matching UI redesign
   const getColor = (val) => {
@@ -100,7 +82,7 @@ export default function PressureGauge({ score = 5.0, playerName = "Player", matc
               }`}
               style={{ color: currentColor }}
             >
-              {animatedScore.toFixed(1)}
+              {currentScoreStr}
             </span>
             <span className="font-teko text-[28px] text-[#8e8e9f] ml-1 font-semibold leading-none">/ 10</span>
           </div>

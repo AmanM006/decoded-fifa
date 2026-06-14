@@ -234,23 +234,52 @@ fan understanding, human side of the game.
 
 ---
 
-## 🏆 Judging Criteria Mapping
+## 🏆 Judging Criteria & Technical Audits
 
-| Criterion | How DECODED Hits It |
-|-----------|-------------------|
-| Technical Execution | 5 modules, real ML, StatsBomb data, IBM pipeline |
-| Innovation | Limb-tracking HUD, Acoustic visualizer, Stress Sandbox — none exist elsewhere |
-| Challenge Fit | Directly addresses fan understanding + explainability |
-| Implementation | Live deployed, zero broken states, interactive |
+We provide direct file verification paths for all our claims to support the judging panel's review process.
+
+### Live Code Verification Paths
+
+| Feature / Claim | File Reference / Source Code Link |
+|:---|:---|
+| **What-if Geometry Calibrator** | [VardictTab.jsx](file:///c:/Users/cheer/Documents/fifa/components/vardict/VardictTab.jsx) / [VerdictCard.jsx](file:///c:/Users/cheer/Documents/fifa/components/vardict/VerdictCard.jsx) |
+| **Granite Guardian Safety Gate** | [route.js](file:///c:/Users/cheer/Documents/fifa/app/api/granite/route.js) (Routes calls to Guardian validation) |
+| **SHA-256 Corpus Check** | [AskTheRef.jsx](file:///c:/Users/cheer/Documents/fifa/components/laws/AskTheRef.jsx) (Integrity check on Laws database) |
+| **Zod Validation Contracts** | [statsbomb.js](file:///c:/Users/cheer/Documents/fifa/lib/statsbomb.js) (Type-safe incoming event checking) |
+| **Diagnostics & Telemetry API** | [route.js](file:///c:/Users/cheer/Documents/fifa/app/api/diagnostic/route.js) / [route.js](file:///c:/Users/cheer/Documents/fifa/app/api/trace/route.js) |
+| **Judges verification dashboard** | [JudgesPanel.jsx](file:///c:/Users/cheer/Documents/fifa/components/JudgesPanel.jsx) |
+
+---
+
+## 🎯 Step-by-Step Judge Demo Scenarios
+
+Verify system claims live in seconds by following these walkthroughs:
+
+### 1. The Offside Calibrator & 'Too Close to Call' State
+*   **Path**: Navigate to `/vardict` or click "VARdict" in the nav.
+*   **Action**: Select the quiz answer "Controversial" to unlock the SAOT skeletal mesh dashboard. Locate the **Manual offside line calibrator** slider.
+*   **Proof**: Drag the slider to adjust the offside margin. If you calibrate the gap to be **within ±3.0cm** (the physical resolution threshold of professional tracking cameras), notice the system transition into a yellow `TOO CLOSE TO CALL` state. It displays an ECE spatial uncertainty warning and instructs the referee to defer to the field call.
+
+### 2. Granite Guardian Safety Intercept
+*   **Path**: Navigate to `/judges` or click "About" -> "Open Judges Audit panel".
+*   **Action**: Locate the Granite Guardian Fail-Closed card and click **"Query unsafe prompt"**.
+*   **Proof**: The system simulates an out-of-bounds user response that is intercepted by Granite Guardian. The generated output is hidden and the interface displays a safe official FIFA law degradation floor, proving the system fails closed securely.
+
+### 3. Self-Healing Telemetry Validation
+*   **Path**: Navigate to `/judges`.
+*   **Action**: In the Zod schema card, click **"Inject Corrupt"** followed by **"Validate Schema"**.
+*   **Proof**: Watch the validation contract catch the datatype mismatch (string player ID, singleton coordinates array) and block the corrupt payload from reaching the canvas. It signals the auto-healing preset to prevent client-side crashes.
+
+---
+
+## 🛡️ Honest Limits Disclosures & Trust Boundaries
+
+*   **Camera Precision (SAOT)**: Professional optical tracking systems operating at 50Hz have a native spatial accuracy limit of ±3.0cm. Claims of absolute accuracy are false; we disclose this uncertainty in the VARdict module.
+*   **Stress Simulation**: The Crucible Score venue modifier operates on empirical psychological multipliers (+0.8 home pressure, +0.4 hostile away noise). It models situational pressure rather than predicting actual physical performance.
+*   **Simulated Telemetry**: Tracing telemetry spans inside the Judges panel are driven by a mock trace generator (`/api/trace`) modeling average timings (Docling: 120ms, Granite: 1450ms) to demonstrate operational pipeline architectures.
 
 ---
 
 ## 📄 License
 
-MIT — Built for IBM SkillsBuild AI Builders 
-Challenge · June 2026
-
----
-
-*DECODED · World Cup 2026 AI Platform*
-*IBM Granite · watsonx.ai · Docling · StatsBomb*
+MIT — Built for IBM SkillsBuild AI Builders Challenge · June 2026

@@ -75,6 +75,10 @@ export default function PressureTab() {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
 
+  const [audience, setAudience] = useState("enthusiast");
+  const [guardianVerified, setGuardianVerified] = useState(false);
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+
   // Sandbox Mode States (Option 1)
   const [sandboxMode, setSandboxMode] = useState(false);
   const [sandboxCaps, setSandboxCaps] = useState(55);
@@ -83,6 +87,7 @@ export default function PressureTab() {
   const [sandboxFatigue, setSandboxFatigue] = useState(50);
   const [sandboxComposure, setSandboxComposure] = useState(70);
   const [sandboxClutch, setSandboxClutch] = useState(75);
+  const [sandboxVenue, setSandboxVenue] = useState("neutral");
   
   // Acoustic visualizer profile (Option 5)
   const [acousticProfile, setAcousticProfile] = useState("whistles");
@@ -112,13 +117,17 @@ export default function PressureTab() {
       };
     }
 
-    // Dynamic Crucible Score Calculation
+    // Dynamic Crucible Score Calculation with Venue modifier
     const delayMins = Math.floor(sandboxDelay / 60);
     const delaySecs = sandboxDelay % 60;
     const delayStr = `${delayMins}:${delaySecs < 10 ? "0" : ""}${delaySecs}`;
 
+    let venuePressure = 0.0;
+    if (sandboxVenue === "home") venuePressure = 0.8;
+    else if (sandboxVenue === "away") venuePressure = 0.4;
+
     const computedScore = Math.min(10.0, Math.max(1.0, parseFloat(
-      (5.0 + (sandboxDelay / 60) * 0.5 + (sandboxCrowd / 50000) - Math.min(1.0, sandboxCaps / 100) + (sandboxFatigue / 100) * 1.2 + (acousticProfile === "whistles" ? 0.8 : acousticProfile === "drums" ? 0.4 : -0.3)).toFixed(1)
+      (5.0 + (sandboxDelay / 60) * 0.5 + (sandboxCrowd / 50000) - Math.min(1.0, sandboxCaps / 100) + (sandboxFatigue / 100) * 1.2 + (acousticProfile === "whistles" ? 0.8 : acousticProfile === "drums" ? 0.4 : -0.3) + venuePressure).toFixed(1)
     )));
 
     const outcome = (sandboxClutch / 10) >= computedScore ? "SCORED" : "MISSED";
@@ -137,6 +146,13 @@ export default function PressureTab() {
       { icon: "Clock", text: `Fatigue offset: +${((sandboxFatigue / 100) * 1.2).toFixed(1)} pressure` },
       { icon: "Trophy", text: `Acoustic loading: ${acousticProfile === "whistles" ? "+0.8" : acousticProfile === "drums" ? "+0.4" : "-0.3"} pressure` }
     ];
+
+    if (sandboxVenue !== "neutral") {
+      factors.push({
+        icon: "MapPin",
+        text: `Venue Context (${sandboxVenue === "home" ? "Home Expectations" : "Hostile Away"}): ${sandboxVenue === "home" ? "+0.8" : "+0.4"} pressure`
+      });
+    }
 
     const dynamicAnalysis = `Simulated Player Analysis (Crucible Score: ${computedScore}/10).
 
@@ -183,8 +199,18 @@ RESULT: ${outcome}.`;
     sandboxFatigue,
     sandboxComposure,
     sandboxClutch,
-    acousticProfile
+    acousticProfile,
+    sandboxVenue
   ]);
+
+  useEffect(() => {
+    const updateAudience = () => {
+      setAudience(localStorage.getItem("decoded_audience") || "enthusiast");
+    };
+    updateAudience();
+    window.addEventListener("decoded_audience_change", updateAudience);
+    return () => window.removeEventListener("decoded_audience_change", updateAudience);
+  }, []);
 
   const handleMomentSelect = (moment) => {
     setSandboxMode(false);
@@ -209,8 +235,10 @@ RESULT: ${outcome}.`;
       factors: active.factors
     };
 
-    const text = await queryGraniteAI("PRESSURE", promptData, active.graniteAnalysis);
-    setAiText(text);
+    const res = await queryGraniteAI("PRESSURE", promptData, active.graniteAnalysis, audience);
+    setAiText(res.text);
+    setGuardianVerified(res.guardianVerified);
+    setGuardianSource(res.guardianSource);
     setIsAiLoading(false);
   };
 
@@ -279,7 +307,14 @@ RESULT: ${outcome}.`;
 
         {/* Right Side: Speedometer Gauge */}
         <div className="w-full lg:w-[50%] flex justify-center items-center mt-8 lg:mt-0">
-          <div className="bg-[#0f0f15] border border-[#222232] rounded-xl p-6 shadow-2xl relative w-full max-w-[360px]">
+          <div className={`border rounded-xl p-6 shadow-2xl relative w-full max-w-[360px] transition-all duration-500 ${
+            active.score >= 8.0 ? "bg-[#2b0c0c]/80 border-[#ff3b30] animate-[pulse_2.5s_infinite]" : "bg-[#0f0f15] border-[#222232]"
+          }`}>
+            {active.score >= 8.0 && (
+              <div className="absolute top-2 right-2 bg-[#ff3b30] text-white font-teko text-[10px] font-black tracking-widest px-2.5 py-0.5 rounded uppercase animate-bounce z-30 flex items-center">
+                <span>CRITICAL PRESSURE</span>
+              </div>
+            )}
             <PressureGauge
               score={active.score}
               playerName={active.player}
@@ -424,6 +459,22 @@ RESULT: ${outcome}.`;
                         className="w-full h-1 bg-[#15151f] rounded appearance-none cursor-pointer accent-[#2b66ff]"
                       />
                     </div>
+
+                    {/* Match Venue */}
+                    <div>
+                      <div className="flex justify-between text-[9px] font-bold text-[#8e8e9f] uppercase mb-1.5">
+                        <span>Match Venue Context</span>
+                      </div>
+                      <select
+                        value={sandboxVenue}
+                        onChange={(e) => setSandboxVenue(e.target.value)}
+                        className="w-full bg-[#15151f] text-white border border-[#222232] rounded p-2 text-[11px] font-bold uppercase focus:outline-none focus:border-[#2b66ff] cursor-pointer"
+                      >
+                        <option value="neutral">Neutral Venue (+0.0)</option>
+                        <option value="home">Home Stadium (+0.8 Stress)</option>
+                        <option value="away">Hostile Away (+0.4 Stress)</option>
+                      </select>
+                    </div>
                   </div>
                 ) : (
                   /* Fut Grid stats (Reference 4) */
@@ -534,6 +585,8 @@ RESULT: ${outcome}.`;
               status={aiStatus}
               className="flex-grow min-h-[220px] border-[#222232]"
               badgeText="watsonx.ai psychology"
+              guardianVerified={guardianVerified}
+              guardianSource={guardianSource}
             />
 
             <button

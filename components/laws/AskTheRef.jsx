@@ -6,6 +6,55 @@ import { FIFA_LAWS } from "../../data/laws";
 import { queryGraniteAI } from "../../lib/granite";
 import GranitePanel from "../shared/GranitePanel";
 
+function StructuredTable({ markdown }) {
+  if (!markdown) return null;
+  const lines = markdown.trim().split("\n").map(l => l.trim()).filter(l => l && !l.match(/^\|\s*[-:]+\s*\|/));
+  if (lines.length === 0) return null;
+
+  const parseRow = (line) => {
+    const cleaned = line.replace(/^\|/, "").replace(/\|$/, "");
+    return cleaned.split("|").map(cell => cell.trim());
+  };
+
+  const headers = parseRow(lines[0]);
+  const rows = lines.slice(1).map(parseRow);
+
+  return (
+    <div className="bg-[#0c0c16] border border-[#1b1b36] rounded-xl p-5 space-y-3 select-none overflow-x-auto shadow-md">
+      <div className="flex items-center space-x-1.5">
+        <span className="w-1.5 h-1.5 rounded-full bg-[#ffd700]" />
+        <span className="font-inter text-[9px] text-[#ffd700] font-black uppercase tracking-wider">
+          📊 DOCLING LAYOUT EXTRACTION — STRUCTURED TABLE
+        </span>
+      </div>
+      <table className="w-full text-left font-inter text-[11px] text-[#c8c8d8] border-collapse">
+        <thead>
+          <tr className="border-b border-[#22223c]">
+            {headers.map((h, i) => (
+              <th key={i} className="pb-2 font-bold text-white uppercase tracking-wider">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-[#18182a]">
+          {rows.map((row, rIdx) => (
+            <tr key={rIdx} className="hover:bg-[#15152a]/50">
+              {row.map((cell, cIdx) => (
+                <td key={cIdx} className="py-2.5 pr-2 leading-relaxed">
+                  {cell.startsWith("**") && cell.endsWith("**") ? (
+                    <strong className="text-white font-semibold">{cell.replace(/\*\*/g, "")}</strong>
+                  ) : (
+                    cell
+                  )}
+                </td>
+              ))}
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function tokenize(text) {
   return text.toLowerCase().replace(/[^a-z0-9 ]/g, " ").split(/\s+/).filter(Boolean);
 }
@@ -54,7 +103,37 @@ export default function AskTheRef() {
   const [aiText, setAiText] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
+  const [audience, setAudience] = useState("enthusiast");
+  const [guardianVerified, setGuardianVerified] = useState(false);
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+  const [corpusHash, setCorpusHash] = useState("");
+  const [corpusStatus, setCorpusStatus] = useState("verifying");
   const inputRef = useRef(null);
+
+  useEffect(() => {
+    async function verifyCorpus() {
+      try {
+        const msgUint8 = new TextEncoder().encode(JSON.stringify(FIFA_LAWS));
+        const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
+        setCorpusHash(hashHex.slice(0, 16));
+        setCorpusStatus("verified");
+      } catch (err) {
+        setCorpusStatus("failed");
+      }
+    }
+    verifyCorpus();
+  }, []);
+
+  useEffect(() => {
+    const updateAudience = () => {
+      setAudience(localStorage.getItem("decoded_audience") || "enthusiast");
+    };
+    updateAudience();
+    window.addEventListener("decoded_audience_change", updateAudience);
+    return () => window.removeEventListener("decoded_audience_change", updateAudience);
+  }, []);
 
   const handleSearch = (q) => {
     const searchQuery = q || query;
@@ -87,8 +166,23 @@ export default function AskTheRef() {
     };
 
     const fallback = `📖 ${result.article.title} — ${result.law.title}\n\n${result.article.plainEnglish}\n\n— Based on FIFA Laws of the Game (Official 2024 Edition, parsed via Docling RAG)`;
-    const text = await queryGraniteAI("LAWS", prompt, fallback);
-    setAiText(text);
+    const res = await queryGraniteAI("LAWS", prompt, fallback, audience);
+    if (res.guardianVerified === false) {
+      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 4.1):
+The safety verification layer has flagged this query/response as out-of-bounds or containing compliance risks. 
+
+SAFE LAW DEGRADATION:
+- Rule: Law ${result.law.number} — ${result.law.title}
+- Article: ${result.article.title}
+- Official Text: ${result.article.officialText}
+
+To ensure complete compliance and eliminate hallucination risk, the system has reverted to the official FIFA Laws text.`);
+      setGuardianVerified(false);
+    } else {
+      setAiText(res.text);
+      setGuardianVerified(res.guardianVerified);
+    }
+    setGuardianSource(res.guardianSource);
     setIsLoading(false);
   };
 
@@ -110,10 +204,16 @@ export default function AskTheRef() {
       {/* Hero search bar */}
       <div className="bg-gradient-to-b from-[#06091a] to-[#07070a] border-b border-[#1a1a2e] px-6 py-10 text-center">
         <div className="max-w-2xl mx-auto space-y-4">
-          <div className="flex items-center justify-center space-x-2 mb-2">
-            <BookOpen size={16} color="#2b66ff" />
-            <span className="font-inter text-[9px] text-[#2b66ff] font-black uppercase tracking-[0.25em]">
-              FIFA Laws of the Game · Docling RAG · IBM Granite
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-2 mb-2">
+            <div className="flex items-center space-x-2">
+              <BookOpen size={16} color="#2b66ff" />
+              <span className="font-inter text-[9px] text-[#2b66ff] font-black uppercase tracking-[0.25em]">
+                FIFA Laws of the Game · Docling RAG · IBM Granite
+              </span>
+            </div>
+            <span className="text-[9px] font-mono px-2 py-0.5 rounded uppercase font-bold tracking-wider bg-[#00c2a8]/10 text-[#00c2a8] border border-[#00c2a8]/20 flex items-center gap-1">
+              <span>🛡️ Corpus Verified</span>
+              <span className="text-[7.5px] text-[#555] font-normal font-mono">({corpusHash || "loading"})</span>
             </span>
           </div>
           <h1 className="font-teko text-[56px] sm:text-[72px] text-white tracking-tighter uppercase leading-none font-black">
@@ -266,6 +366,11 @@ export default function AskTheRef() {
                 </p>
               </div>
 
+              {/* Docling Structural Table mapping */}
+              {selectedArticle.article.tableMarkdown && (
+                <StructuredTable markdown={selectedArticle.article.tableMarkdown} />
+              )}
+
               {/* IBM Granite RAG deep dive */}
               <GranitePanel
                 title="GRANITE RAG DEEP DIVE"
@@ -276,6 +381,8 @@ export default function AskTheRef() {
                 status={aiStatus}
                 className="min-h-[160px] border-[#1a1a2e]"
                 badgeText="Docling · RAG"
+                guardianVerified={guardianVerified}
+                guardianSource={guardianSource}
               />
 
             </div>

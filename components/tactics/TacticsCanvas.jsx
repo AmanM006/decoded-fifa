@@ -8,9 +8,37 @@ export default function TacticsCanvas({
   setIsPlaying,
   playbackSpeed = 1,
   progress,
-  setProgress
+  setProgress,
+  aiText = "" // active canvas director trigger text
 }) {
   const canvasRef = useRef(null);
+  
+  // Track coordinates of players
+  const [playerPositions, setPlayerPositions] = useState({ attackers: [], defenders: [], goalkeeper: null });
+
+  // Update positions according to animation progress t (scrubbing or playing)
+  useEffect(() => {
+    if (corner) {
+      const t = progress;
+      setPlayerPositions({
+        attackers: corner.attackers.map(p => ({
+          ...p,
+          curX: p.x + (p.runX - p.x) * t,
+          curY: p.y + (p.runY - p.y) * t
+        })),
+        defenders: corner.defenders.map(p => ({
+          ...p,
+          curX: p.x + (p.trackX - p.x) * t,
+          curY: p.y + (p.trackY - p.y) * t
+        })),
+        goalkeeper: corner.goalkeeper ? {
+          ...corner.goalkeeper,
+          curX: corner.goalkeeper.x,
+          curY: corner.goalkeeper.y
+        } : null
+      });
+    }
+  }, [progress, corner]);
 
   // Handle local state or animation frames
   useEffect(() => {
@@ -112,11 +140,9 @@ export default function TacticsCanvas({
       ctx.stroke();
 
       // Corner arcs (top-right and bottom-right corner flags)
-      // Top Right flag
       ctx.beginPath();
       ctx.arc(goalLineX, 20, 15, Math.PI / 2, Math.PI);
       ctx.stroke();
-      // Bottom Right flag
       ctx.beginPath();
       ctx.arc(goalLineX, H - 20, 15, Math.PI, 1.5 * Math.PI);
       ctx.stroke();
@@ -124,6 +150,42 @@ export default function TacticsCanvas({
       if (!corner) return;
 
       const t = nextProgress;
+
+      // Active Canvas Director triggers parsing
+      const highlightPenaltyBox = aiText && aiText.includes("[HIGHLIGHT: PENALTY_BOX]");
+      const highlightZone14 = aiText && aiText.includes("[HIGHLIGHT: ZONE_14]");
+      const focusAttackerNum = aiText ? aiText.match(/\[FOCUS: ATTACKER_(\d+)\]/)?.[1] : null;
+      const showLinesForce = aiText && aiText.includes("[SHOW_LINES]");
+
+      // Draw Highlight Penalty Box if triggered
+      if (highlightPenaltyBox) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 59, 48, 0.8)";
+        ctx.lineWidth = 3 + Math.sin(Date.now() * 0.005) * 1.5;
+        ctx.fillStyle = "rgba(255, 59, 48, 0.06)";
+        ctx.beginPath();
+        ctx.moveTo(goalLineX, 70);
+        ctx.lineTo(goalLineX - 220, 70);
+        ctx.lineTo(goalLineX - 220, H - 70);
+        ctx.lineTo(goalLineX, H - 70);
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      // Draw Highlight Zone 14 if triggered
+      if (highlightZone14) {
+        ctx.save();
+        ctx.strokeStyle = "rgba(255, 215, 0, 0.8)";
+        ctx.lineWidth = 3 + Math.sin(Date.now() * 0.005) * 1.5;
+        ctx.fillStyle = "rgba(255, 215, 0, 0.06)";
+        ctx.beginPath();
+        ctx.rect(goalLineX - 340, 120, 120, 240);
+        ctx.fill();
+        ctx.stroke();
+        ctx.restore();
+      }
 
       // 4. Target zone / delivery area
       const target = corner.targetZone;
@@ -143,169 +205,195 @@ export default function TacticsCanvas({
       }
 
       // 5. Draw Player movement runs (under player dots)
-      // Attackers runs (orange)
-      corner.attackers.forEach((p) => {
-        ctx.strokeStyle = "rgba(255, 109, 0, 0.35)";
-        ctx.lineWidth = 1.2;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.runX, p.runY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Small running path arrowhead
-        const angle = Math.atan2(p.runY - p.y, p.runX - p.x);
-        ctx.fillStyle = "rgba(255, 109, 0, 0.6)";
-        ctx.beginPath();
-        ctx.moveTo(p.runX, p.runY);
-        ctx.lineTo(p.runX - 5 * Math.cos(angle - Math.PI / 6), p.runY - 5 * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(p.runX - 5 * Math.cos(angle + Math.PI / 6), p.runY - 5 * Math.sin(angle + Math.PI / 6));
-        ctx.fill();
+      playerPositions.attackers.forEach((p) => {
+        if (isPlaying) {
+          ctx.strokeStyle = "rgba(255, 109, 0, 0.35)";
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.runX, p.runY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
       });
 
-      // Defenders runs (blue)
-      corner.defenders.forEach((p) => {
-        ctx.strokeStyle = "rgba(21, 101, 192, 0.35)";
-        ctx.lineWidth = 1.2;
-        ctx.setLineDash([3, 3]);
-        ctx.beginPath();
-        ctx.moveTo(p.x, p.y);
-        ctx.lineTo(p.trackX, p.trackY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Small running path arrowhead
-        const angle = Math.atan2(p.trackY - p.y, p.trackX - p.x);
-        ctx.fillStyle = "rgba(21, 101, 192, 0.6)";
-        ctx.beginPath();
-        ctx.moveTo(p.trackX, p.trackY);
-        ctx.lineTo(p.trackX - 5 * Math.cos(angle - Math.PI / 6), p.trackY - 5 * Math.sin(angle - Math.PI / 6));
-        ctx.lineTo(p.trackX - 5 * Math.cos(angle + Math.PI / 6), p.trackY - 5 * Math.sin(angle + Math.PI / 6));
-        ctx.fill();
+      playerPositions.defenders.forEach((p) => {
+        if (isPlaying) {
+          ctx.strokeStyle = "rgba(21, 101, 192, 0.35)";
+          ctx.lineWidth = 1.2;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(p.x, p.y);
+          ctx.lineTo(p.trackX, p.trackY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+        }
       });
 
-      // 6. Draw Player Positions (interpolated by time t)
+      // 6. Draw Player Positions
       // Attackers (Red, R=12)
-      corner.attackers.forEach((p) => {
-        const curX = p.x + (p.runX - p.x) * t;
-        const curY = p.y + (p.runY - p.y) * t;
-
+      playerPositions.attackers.forEach((p) => {
         ctx.beginPath();
-        ctx.arc(curX, curY, 12, 0, Math.PI * 2);
+        ctx.arc(p.curX, p.curY, 12, 0, Math.PI * 2);
         ctx.fillStyle = "#e8002d";
         ctx.fill();
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Number
         ctx.fillStyle = "#fff";
         ctx.font = "bold 9px Inter";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(p.num, curX, curY);
+        ctx.fillText(p.num, p.curX, p.curY);
 
-        // Name
         ctx.fillStyle = "rgba(255,255,255,0.65)";
         ctx.font = "8px Inter";
-        ctx.fillText(p.name, curX, curY + 20);
+        ctx.fillText(p.name, p.curX, p.curY + 20);
       });
 
       // Defenders (Blue, R=12)
-      corner.defenders.forEach((p) => {
-        const curX = p.x + (p.trackX - p.x) * t;
-        const curY = p.y + (p.trackY - p.y) * t;
-
+      playerPositions.defenders.forEach((p) => {
         ctx.beginPath();
-        ctx.arc(curX, curY, 12, 0, Math.PI * 2);
+        ctx.arc(p.curX, p.curY, 12, 0, Math.PI * 2);
         ctx.fillStyle = "#1565c0";
         ctx.fill();
         ctx.strokeStyle = "#fff";
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Number
         ctx.fillStyle = "#fff";
         ctx.font = "bold 9px Inter";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(p.num, curX, curY);
+        ctx.fillText(p.num, p.curX, p.curY);
 
-        // Name
         ctx.fillStyle = "rgba(255,255,255,0.65)";
         ctx.font = "8px Inter";
-        ctx.fillText(p.name, curX, curY + 20);
+        ctx.fillText(p.name, p.curX, p.curY + 20);
       });
 
       // Goalkeeper (Gold, R=14)
-      const gk = corner.goalkeeper;
+      const gk = playerPositions.goalkeeper;
       if (gk) {
         ctx.beginPath();
-        ctx.arc(gk.x, gk.y, 14, 0, Math.PI * 2);
+        ctx.arc(gk.curX, gk.curY, 14, 0, Math.PI * 2);
         ctx.fillStyle = "#ffd700";
         ctx.fill();
         ctx.strokeStyle = "#000";
         ctx.lineWidth = 1.5;
         ctx.stroke();
 
-        // Number
         ctx.fillStyle = "#000";
         ctx.font = "bold 9px Inter";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(gk.num, gk.x, gk.y);
+        ctx.fillText(gk.num, gk.curX, gk.curY);
 
-        // Name
         ctx.fillStyle = "rgba(255,215,0,0.75)";
         ctx.font = "8px Inter";
-        ctx.fillText(gk.name, gk.x, gk.y + 22);
+        ctx.fillText(gk.name, gk.curX, gk.curY + 22);
       }
 
-      // 7. Ball trajectory and flight
-      const start = corner.ballStart;
-      const end = { x: target.x, y: target.y };
-      // Control point for quadratic curve representing flight arc curve
-      const cp = {
-        x: (start.x + end.x) / 2 - 80,
-        y: (start.y + end.y) / 2 - 90
-      };
+      // Player focus glow (Active Canvas Director)
+      if (focusAttackerNum) {
+        const targetPlayer = playerPositions.attackers.find(p => String(p.num) === String(focusAttackerNum));
+        if (targetPlayer) {
+          ctx.save();
+          ctx.strokeStyle = "#ffd700";
+          ctx.lineWidth = 3 + Math.sin(Date.now() * 0.01) * 1.5;
+          ctx.beginPath();
+          ctx.arc(targetPlayer.curX, targetPlayer.curY, 20 + Math.sin(Date.now() * 0.01) * 3, 0, Math.PI * 2);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
 
-      // Draw full flight path dashed
-      ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 4]);
-      ctx.beginPath();
-      ctx.moveTo(start.x, start.y);
-      ctx.quadraticCurveTo(cp.x, cp.y, end.x, end.y);
-      ctx.stroke();
-      ctx.setLineDash([]);
+      // 7. Dynamic passing lane counterfactual drawing
+      if (!isPlaying || showLinesForce) {
+        playerPositions.attackers.forEach((att) => {
+          // Calculate if passing lane is clear from ball start to this attacker
+          const start = corner.ballStart;
+          let blocked = false;
+          
+          // Simple collision line segment checking against defenders
+          playerPositions.defenders.forEach((def) => {
+            // Distance from defender center to passing line segment
+            const x0 = def.curX, y0 = def.curY;
+            const x1 = start.x, y1 = start.y;
+            const x2 = att.curX, y2 = att.curY;
+            const A = x0 - x1, B = y0 - y1, C = x2 - x1, D = y2 - y1;
+            const dot = A * C + B * D;
+            const lenSq = C * C + D * D;
+            let param = -1;
+            if (lenSq !== 0) param = dot / lenSq;
 
-      // Draw animated ball moving along path
-      // Ball coordinates along quadratic Bezier curve
-      const bx = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * cp.x + t * t * end.x;
-      const by = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * cp.y + t * t * end.y;
+            let xx, yy;
+            if (param < 0) { xx = x1; yy = y1; }
+            else if (param > 1) { xx = x2; yy = y2; }
+            else { xx = x1 + param * C; yy = y1 + param * D; }
 
-      // Ball height factor (simulated by scaling ball radius)
-      // Height peaks at t = 0.5
-      const heightMultiplier = 1 + 6 * Math.sin(t * Math.PI);
+            const dist = Math.hypot(x0 - xx, y0 - yy);
+            if (dist < 22) { // 22px collision threshold
+              blocked = true;
+            }
+          });
 
-      ctx.beginPath();
-      ctx.arc(bx, by, 4 + heightMultiplier, 0, Math.PI * 2);
-      ctx.fillStyle = "#ffffff";
-      ctx.fill();
-      ctx.strokeStyle = "#000000";
-      ctx.lineWidth = 1.5;
-      ctx.stroke();
+          ctx.beginPath();
+          ctx.moveTo(start.x, start.y);
+          ctx.lineTo(att.curX, att.curY);
+          if (blocked) {
+            ctx.strokeStyle = "#ff3b30";
+            ctx.setLineDash([4, 4]);
+          } else {
+            ctx.strokeStyle = "#00c853";
+            ctx.lineWidth = 2;
+          }
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.lineWidth = 1;
+        });
+      }
 
-      // Ball core details
-      ctx.beginPath();
-      ctx.arc(bx, by, 1, 0, Math.PI * 2);
-      ctx.fillStyle = "#000";
-      ctx.fill();
+      // 8. Ball trajectory and flight
+      if (isPlaying) {
+        const start = corner.ballStart;
+        const end = { x: target.x, y: target.y };
+        const cp = {
+          x: (start.x + end.x) / 2 - 80,
+          y: (start.y + end.y) / 2 - 90
+        };
 
-      // 8. Outcome overlay label (top right)
-      if (t >= 0.95) {
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.2)";
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([4, 4]);
+        ctx.beginPath();
+        ctx.moveTo(start.x, start.y);
+        ctx.quadraticCurveTo(cp.x, cp.y, end.x, end.y);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const bx = (1 - t) * (1 - t) * start.x + 2 * (1 - t) * t * cp.x + t * t * end.x;
+        const by = (1 - t) * (1 - t) * start.y + 2 * (1 - t) * t * cp.y + t * t * end.y;
+        const heightMultiplier = 1 + 6 * Math.sin(t * Math.PI);
+
+        ctx.beginPath();
+        ctx.arc(bx, by, 4 + heightMultiplier, 0, Math.PI * 2);
+        ctx.fillStyle = "#ffffff";
+        ctx.fill();
+        ctx.strokeStyle = "#000000";
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.arc(bx, by, 1, 0, Math.PI * 2);
+        ctx.fillStyle = "#000";
+        ctx.fill();
+      }
+
+      // 9. Outcome overlay label (top right)
+      if (isPlaying && t >= 0.95) {
         ctx.save();
         ctx.font = "bold 32px Teko";
         ctx.textAlign = "right";
@@ -329,7 +417,7 @@ export default function TacticsCanvas({
     animFrame = requestAnimationFrame(draw);
 
     return () => cancelAnimationFrame(animFrame);
-  }, [corner, isPlaying, playbackSpeed, progress, setProgress, setIsPlaying]);
+  }, [corner, isPlaying, playbackSpeed, progress, setProgress, setIsPlaying, playerPositions, aiText]);
 
   return (
     <div className="flex-1 min-h-0 flex items-center justify-center overflow-hidden">

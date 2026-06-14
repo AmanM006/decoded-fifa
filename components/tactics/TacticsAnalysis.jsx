@@ -6,16 +6,21 @@ import GranitePanel from "../shared/GranitePanel";
 import { Brain, Sparkles, TrendingUp } from "lucide-react";
 import { queryGraniteAI } from "../../lib/granite";
 
-export default function TacticsAnalysis({ corner, matchName, onLoadCorner }) {
-  const [aiText, setAiText] = useState(corner?.tacticalBreakdown || "");
+export default function TacticsAnalysis({ corner, matchName, onLoadCorner, aiText, setAiText }) {
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
+  const [audience, setAudience] = useState("enthusiast");
+  const [guardianVerified, setGuardianVerified] = useState(false);
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
 
   useEffect(() => {
-    if (corner) {
-      setAiText(corner.tacticalBreakdown);
-    }
-  }, [corner]);
+    const updateAudience = () => {
+      setAudience(localStorage.getItem("decoded_audience") || "enthusiast");
+    };
+    updateAudience();
+    window.addEventListener("decoded_audience_change", updateAudience);
+    return () => window.removeEventListener("decoded_audience_change", updateAudience);
+  }, []);
 
   const handleTacticalAnalysis = async () => {
     if (!corner) return;
@@ -37,8 +42,10 @@ export default function TacticsAnalysis({ corner, matchName, onLoadCorner }) {
       details: corner.tacticalBreakdown
     };
 
-    const text = await queryGraniteAI("TACTICS", promptData, corner.tacticalBreakdown);
-    setAiText(text);
+    const res = await queryGraniteAI("TACTICS", promptData, corner.tacticalBreakdown, audience);
+    setAiText(res.text);
+    setGuardianVerified(res.guardianVerified);
+    setGuardianSource(res.guardianSource);
     setIsAiLoading(false);
   };
 
@@ -58,6 +65,8 @@ export default function TacticsAnalysis({ corner, matchName, onLoadCorner }) {
             isLoading={isAiLoading}
             status={aiStatus}
             className="min-h-[220px] border-[#222232]"
+            guardianVerified={guardianVerified}
+            guardianSource={guardianSource}
             badgeText="Granite Spatial AI"
           />
 

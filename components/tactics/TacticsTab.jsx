@@ -17,12 +17,16 @@ export default function TacticsTab() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [playbackSpeed, setPlaybackSpeed] = useState(1);
   const [progress, setProgress] = useState(0);
+  const [aiText, setAiText] = useState("");
 
   useEffect(() => {
     const firstCorner = selectedMatch.corners[0];
     setSelectedCorner(firstCorner);
     setProgress(0);
     setIsPlaying(false);
+    if (firstCorner) {
+      setAiText(firstCorner.tacticalBreakdown);
+    }
   }, [selectedMatch]);
 
   const handleMatchChange = (e) => {
@@ -37,6 +41,9 @@ export default function TacticsTab() {
     setSelectedCorner(corner);
     setProgress(0);
     setIsPlaying(false);
+    if (corner) {
+      setAiText(corner.tacticalBreakdown);
+    }
   };
 
   const handlePlayToggle = () => {
@@ -62,10 +69,10 @@ export default function TacticsTab() {
   });
 
   return (
-    <div className="flex flex-col lg:flex-row w-full bg-[#07070a] min-h-[calc(100vh-56px)] select-none font-inter">
+    <div className="flex flex-col lg:flex-row w-full bg-[#07070a] min-h-[calc(100vh-52px)] lg:h-[calc(100vh-52px)] lg:overflow-hidden select-none font-inter">
       
       {/* LEFT SIDEBAR (Editorial Dark Style - Reference 2) */}
-      <aside className="w-full lg:w-[320px] border-r border-[#222232] bg-[#0c0c12] p-6 shrink-0 flex flex-col space-y-6">
+      <aside className="w-full lg:w-[320px] lg:h-full border-r border-[#222232] bg-[#0c0c12] p-6 shrink-0 flex flex-col space-y-6 lg:overflow-y-auto">
         
         {/* Match Dropdown */}
         <div>
@@ -183,10 +190,10 @@ export default function TacticsTab() {
       </aside>
 
       {/* MAIN DISPLAY CANVAS PANEL (flex-grow) */}
-      <main className="flex-grow flex flex-col">
+      <main className="flex-grow flex flex-col lg:h-full lg:overflow-y-auto">
 
         {/* ── VIEWPORT-LOCKED SECTION: topbar + canvas + playback always fit one screen ── */}
-        <div className="h-[calc(100vh-52px)] flex flex-col overflow-hidden">
+        <div className="h-auto lg:h-[calc(100vh-52px)] flex flex-col overflow-hidden shrink-0">
 
           {/* Top bar */}
           <div className="h-[48px] border-b border-[#222232] bg-[#0c0c12] px-6 flex items-center justify-between shrink-0">
@@ -237,6 +244,7 @@ export default function TacticsTab() {
                   playbackSpeed={playbackSpeed}
                   progress={progress}
                   setProgress={setProgress}
+                  aiText={aiText}
                 />
               ) : (
                 <div className="flex-1 min-h-0 flex items-center justify-center border border-[#222232] border-dashed rounded-xl">
@@ -321,6 +329,8 @@ export default function TacticsTab() {
           <TacticsAnalysis
             corner={selectedCorner}
             matchName={selectedMatch.name}
+            aiText={aiText}
+            setAiText={setAiText}
             onLoadCorner={(cid) => {
               const matchCorner = selectedMatch.corners.find((c) => c.id === cid);
               if (matchCorner) {

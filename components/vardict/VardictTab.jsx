@@ -18,7 +18,8 @@ import {
   Camera, 
   Fingerprint, 
   Info,
-  Cpu
+  Cpu,
+  AlertTriangle
 } from "lucide-react";
 
 export default function VardictTab() {
@@ -36,6 +37,10 @@ export default function VardictTab() {
   const [userChoice, setUserChoice] = useState("");
   const [limbMode, setLimbMode] = useState(false);
 
+  const [audience, setAudience] = useState("enthusiast");
+  const [guardianVerified, setGuardianVerified] = useState(false);
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+
   useEffect(() => {
     setAiText(selectedIncident.graniteAnalysis);
     setCalibratedOffset(0);
@@ -43,6 +48,60 @@ export default function VardictTab() {
     setUserChoice("");
     setLimbMode(false);
   }, [selectedIncident]);
+
+  useEffect(() => {
+    const updateAudience = () => {
+      setAudience(localStorage.getItem("decoded_audience") || "enthusiast");
+    };
+    updateAudience();
+    window.addEventListener("decoded_audience_change", updateAudience);
+    return () => window.removeEventListener("decoded_audience_change", updateAudience);
+  }, []);
+
+  const getDynamicVerdict = () => {
+    if (!selectedIncident) return { verdict: "CORRECT", confidence: 90, lawCited: "" };
+    if (selectedIncident.type !== "OFFSIDE") {
+      return {
+        verdict: selectedIncident.verdict,
+        confidence: selectedIncident.confidence,
+        lawCited: selectedIncident.lawCited,
+        isTooClose: false
+      };
+    }
+    const baseGap = selectedIncident.drawingData?.gap ?? 2.3;
+    const currentGap = baseGap + calibratedOffset;
+    if (Math.abs(currentGap) < 3.0) {
+      return {
+        verdict: "CONTROVERSIAL",
+        isTooClose: true,
+        confidence: 50,
+        lawCited: `ECE 0.34% spatial uncertainty margin reached (calibrated gap: ${currentGap.toFixed(1)}cm). The difference is within the 3.0cm camera projection resolution threshold. Referees must defer to on-field call.`
+      };
+    }
+    const isOffside = currentGap > 0;
+    // Map expected correctness
+    const originallyOffside = baseGap > 0;
+    const originallyUpheld = selectedIncident.verdict === "CORRECT";
+    
+    // Determine new verdict
+    let expectedVerdict = "CORRECT";
+    if (isOffside !== originallyOffside) {
+      expectedVerdict = originallyUpheld ? "WRONG" : "CORRECT";
+    } else {
+      expectedVerdict = originallyUpheld ? "CORRECT" : "WRONG";
+    }
+    
+    return {
+      verdict: expectedVerdict,
+      confidence: Math.min(100, Math.round(50 + (Math.abs(currentGap) - 3) * 1.5)),
+      lawCited: isOffside
+        ? `Law 11 (Offside): Player is in active offside position by +${currentGap.toFixed(1)}cm. Ruling is ${expectedVerdict}.`
+        : `Law 11 (Offside): Player is ONSIDE by ${currentGap.toFixed(1)}cm (onside buffer). Ruling is ${expectedVerdict}.`,
+      isTooClose: false
+    };
+  };
+
+  const dynamicVerdict = getDynamicVerdict();
 
   const handleIncidentSelect = (inc) => {
     setSelectedIncident(inc);
@@ -61,15 +120,29 @@ export default function VardictTab() {
       match: selectedIncident.match,
       minute: selectedIncident.minute,
       type: selectedIncident.type,
-      verdict: selectedIncident.verdict,
-      confidence: selectedIncident.confidence,
+      verdict: dynamicVerdict.verdict,
+      confidence: dynamicVerdict.confidence,
       lawExcerpt: selectedIncident.lawExcerpt,
-      description: selectedIncident.description,
+      description: selectedIncident.description + ` (Calibrated manual gap: ${(selectedIncident.drawingData?.gap + calibratedOffset).toFixed(1)}cm)`,
       players: selectedIncident.players
     };
 
-    const text = await queryGraniteAI("VARDICT", promptData, selectedIncident.graniteAnalysis);
-    setAiText(text);
+    const res = await queryGraniteAI("VARDICT", promptData, selectedIncident.graniteAnalysis, audience);
+    if (res.guardianVerified === false) {
+      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 4.1):
+Under enterprise compliance protocols, this generated response was flagged as potentially unsafe or containing rule hallucinations.
+
+SAFE LAW DEGRADATION:
+- Law Article: ${selectedIncident.lawCited}
+- Official Text: ${selectedIncident.lawExcerpt}
+
+The AI reasoning engine has failed-closed to prevent rule hallucinations, reverting to the pre-signed official rulebook text.`);
+      setGuardianVerified(false);
+    } else {
+      setAiText(res.text);
+      setGuardianVerified(res.guardianVerified);
+    }
+    setGuardianSource(res.guardianSource);
     setIsAiLoading(false);
   };
 
@@ -236,7 +309,16 @@ export default function VardictTab() {
                 </div>
               </div>
 
-              {limbMode ? (
+              {/* Strict Conditional Rendering: Lockout until quiz is submitted */}
+              {!quizSubmitted ? (
+                <div className="flex-1 min-h-[280px] flex flex-col items-center justify-center border border-[#ff3b30]/20 border-dashed rounded-xl bg-red-950/5 p-6 text-center select-none">
+                  <Scale size={32} className="text-[#ff3b30] mb-3 animate-pulse" />
+                  <span className="font-teko text-[20px] text-white uppercase tracking-wider block font-bold">TELEMETRY LOCK: SYSTEM PAUSED</span>
+                  <p className="text-[11px] text-[#8e8e9f] mt-1.5 max-w-[280px] leading-relaxed">
+                    Under FIFA integrity protocols, you must select your verdict in the <strong className="text-[#ffd700]">Referee Decision Lab Quiz</strong> panel on the right to unlock the SAOT telemetry mesh and legal reconstruct.
+                  </p>
+                </div>
+              ) : limbMode ? (
                 <LimbTrackingHUD incident={selectedIncident} />
               ) : (
                 <VARCanvas
@@ -245,12 +327,13 @@ export default function VardictTab() {
                   showCameras={showCameras}
                   viewMode={viewMode}
                   calibratedOffset={calibratedOffset}
+                  aiText={aiText}
                 />
               )}
 
               {/* Controls */}
               <div className="flex flex-wrap gap-2 mt-4 justify-center">
-                {selectedIncident.type === "OFFSIDE" && (
+                {selectedIncident.type === "OFFSIDE" && quizSubmitted && (
                   <button
                     onClick={() => setShowOffsideLine(!showOffsideLine)}
                     className={`px-4 py-2 rounded-none font-teko text-[13px] tracking-wider uppercase border transition-all cursor-pointer ${
@@ -263,19 +346,21 @@ export default function VardictTab() {
                   </button>
                 )}
 
-                <button
-                  onClick={() => setShowCameras(!showCameras)}
-                  className={`px-4 py-2 rounded-none font-teko text-[13px] tracking-wider uppercase border transition-all flex items-center space-x-1.5 cursor-pointer ${
-                    showCameras
-                      ? "bg-[#00c2a8] text-black border-black font-black"
-                      : "bg-[#15151f] text-[#8e8e9f] border-[#222232] hover:text-white"
-                  }`}
-                >
-                  <Camera size={12} />
-                  <span>{showCameras ? "HIDE CALIBRATED CAMERAS" : "SHOW CAMERAS"}</span>
-                </button>
+                {quizSubmitted && (
+                  <button
+                    onClick={() => setShowCameras(!showCameras)}
+                    className={`px-4 py-2 rounded-none font-teko text-[13px] tracking-wider uppercase border transition-all flex items-center space-x-1.5 cursor-pointer ${
+                      showCameras
+                        ? "bg-[#00c2a8] text-black border-black font-black"
+                        : "bg-[#15151f] text-[#8e8e9f] border-[#222232] hover:text-white"
+                    }`}
+                  >
+                    <Camera size={12} />
+                    <span>{showCameras ? "HIDE CALIBRATED CAMERAS" : "SHOW CAMERAS"}</span>
+                  </button>
+                )}
 
-                {selectedIncident.type === "OFFSIDE" && (
+                {selectedIncident.type === "OFFSIDE" && quizSubmitted && (
                   <button
                     onClick={() => setViewMode(viewMode === "MATCH" ? "BODY_PART" : "MATCH")}
                     className={`px-4 py-2 rounded-none font-teko text-[13px] tracking-wider uppercase border transition-all flex items-center space-x-1.5 cursor-pointer ${
@@ -290,7 +375,7 @@ export default function VardictTab() {
                 )}
 
                 {/* LIMB TRACK HUD toggle */}
-                {selectedIncident.limbData && (
+                {selectedIncident.limbData && quizSubmitted && (
                   <button
                     onClick={() => setLimbMode(!limbMode)}
                     className={`px-4 py-2 rounded-none font-teko text-[13px] tracking-wider uppercase border transition-all flex items-center space-x-1.5 cursor-pointer ${
@@ -306,7 +391,7 @@ export default function VardictTab() {
               </div>
 
               {/* VAR Calibrator Slider (Option 2) */}
-              {selectedIncident.type === "OFFSIDE" && (
+              {selectedIncident.type === "OFFSIDE" && quizSubmitted && (
                 <div className="mt-5 bg-black/40 border border-[#222232] p-4 rounded-xl">
                   <div className="flex items-center justify-between mb-2">
                     <span className="font-inter text-[9px] text-[#8e8e9f] font-bold uppercase tracking-wider">
@@ -362,10 +447,21 @@ export default function VardictTab() {
           <div className="lg:col-span-4 space-y-5">
             
             {/* Referee quiz card (Option 4) */}
-            <div className="bg-[#0f0f15] border border-[#222232] rounded-xl p-5">
-              <div className="flex items-center space-x-1.5 mb-2.5">
-                <Scale size={13} className="text-[#ffd700]" />
-                <DataLabel>REFEREE DECISION LAB QUIZ</DataLabel>
+            <div className={`bg-[#0f0f15] border rounded-xl p-5 transition-all ${
+              !quizSubmitted 
+                ? "border-[#ffd700] shadow-[0_0_15px_rgba(255,215,0,0.15)] animate-[pulse_2.5s_infinite]" 
+                : "border-[#222232]"
+            }`}>
+              <div className="flex items-center justify-between mb-2.5 flex-wrap gap-2">
+                <div className="flex items-center space-x-1.5">
+                  <Scale size={13} className="text-[#ffd700]" />
+                  <DataLabel>REFEREE DECISION LAB QUIZ</DataLabel>
+                </div>
+                {!quizSubmitted && (
+                  <span className="bg-[#ffd700]/10 border border-[#ffd700]/30 text-[#ffd700] text-[8px] font-bold px-2 py-0.5 rounded font-inter uppercase tracking-wider animate-pulse">
+                    ACTION REQUIRED
+                  </span>
+                )}
               </div>
               {quizSubmitted ? (
                 <div className="space-y-3">
@@ -375,9 +471,9 @@ export default function VardictTab() {
                   </div>
                   <div className="p-3 bg-[#00c2a8]/10 border border-[#00c2a8]/30 rounded">
                     <span className="text-[9px] text-[#00c2a8] uppercase font-bold block">Official FIFA Verdict</span>
-                    <span className="font-teko text-[17px] text-[#00c2a8] uppercase tracking-wider block font-bold mt-0.5">{selectedIncident.verdict} ({selectedIncident.confidence}% confidence)</span>
+                    <span className="font-teko text-[17px] text-[#00c2a8] uppercase tracking-wider block font-bold mt-0.5">{dynamicVerdict.verdict} ({dynamicVerdict.confidence}% confidence)</span>
                   </div>
-                  <p className="text-[11px] text-[#8e8e9f] leading-snug">{selectedIncident.lawCited}</p>
+                  <p className="text-[11px] text-[#8e8e9f] leading-snug">{dynamicVerdict.lawCited}</p>
                   <button onClick={() => setQuizSubmitted(false)} className="text-[11.5px] text-[#2b66ff] hover:underline font-bold cursor-pointer">Rule again</button>
                 </div>
               ) : (
@@ -404,9 +500,10 @@ export default function VardictTab() {
             {/* Decision card (unlocked after quiz submission) */}
             {quizSubmitted ? (
               <VerdictCard
-                verdict={selectedIncident.verdict}
-                confidence={selectedIncident.confidence}
-                lawCited={selectedIncident.lawCited}
+                verdict={dynamicVerdict.verdict}
+                confidence={dynamicVerdict.confidence}
+                lawCited={dynamicVerdict.lawCited}
+                isTooClose={dynamicVerdict.isTooClose}
               />
             ) : (
               <div className="bg-[#0f0f15]/50 border border-[#222232] border-dashed rounded-xl p-5 text-center flex flex-col justify-center items-center h-[120px]">
@@ -419,25 +516,38 @@ export default function VardictTab() {
 
             {/* IBM Granite Legal Analysis */}
             <div className="space-y-2">
-              <GranitePanel
-                title="GRANITE LEGAL RECONSTRUCT"
-                icon={Scale}
-                iconColor="#2b66ff"
-                text={aiText}
-                isLoading={isAiLoading}
-                status={aiStatus}
-                className="min-h-[260px] border-[#222232]"
-                badgeText="FIFA Laws Docling RAG"
-              />
+              {quizSubmitted ? (
+                <>
+                   <GranitePanel
+                    title="GRANITE LEGAL RECONSTRUCT"
+                    icon={Scale}
+                    iconColor="#2b66ff"
+                    text={aiText}
+                    isLoading={isAiLoading}
+                    status={aiStatus}
+                    className="min-h-[260px] border-[#222232]"
+                    badgeText="FIFA Laws Docling RAG"
+                    guardianVerified={guardianVerified}
+                    guardianSource={guardianSource}
+                  />
 
-              <button
-                onClick={triggerLegalAnalysis}
-                disabled={isAiLoading}
-                className="bg-[#2b66ff] hover:bg-[#1a4eff] disabled:opacity-50 text-white font-teko text-[16px] tracking-wider uppercase h-11 w-full rounded-none flex items-center justify-center space-x-2 border border-black shadow active:scale-[0.98] transition-all cursor-pointer font-bold select-none"
-              >
-                <Scale size={13} />
-                <span>Verify with IBM Granite</span>
-              </button>
+                  <button
+                    onClick={triggerLegalAnalysis}
+                    disabled={isAiLoading}
+                    className="bg-[#2b66ff] hover:bg-[#1a4eff] disabled:opacity-50 text-white font-teko text-[16px] tracking-wider uppercase h-11 w-full rounded-none flex items-center justify-center space-x-2 border border-black shadow active:scale-[0.98] transition-all cursor-pointer font-bold select-none"
+                  >
+                    <Scale size={13} />
+                    <span>Verify with IBM Granite</span>
+                  </button>
+                </>
+              ) : (
+                <div className="bg-[#0f0f15]/50 border border-[#222232] border-dashed rounded-xl p-5 text-center flex flex-col justify-center items-center h-[120px] select-none">
+                  <Scale size={20} className="text-[#333] mb-2" />
+                  <span className="text-[10px] text-[#555] uppercase font-bold tracking-widest font-inter">
+                    Submit decision to unlock legal explanation
+                  </span>
+                </div>
+              )}
             </div>
 
             {/* Fan opinons poll */}

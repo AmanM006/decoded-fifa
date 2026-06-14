@@ -19,7 +19,13 @@ export const FIFA_LAWS = [
         title: "Field Dimensions",
         keywords: ["size", "length", "width", "dimensions", "pitch size", "big", "small", "how big"],
         officialText: "The field of play must be rectangular and marked with continuous lines. The length of the touch line must be greater than the length of the goal line. Length: minimum 90m – maximum 120m. Width: minimum 45m – maximum 90m. International matches: Length: minimum 100m – maximum 110m. Width: minimum 64m – maximum 75m.",
-        plainEnglish: "A standard pitch is roughly 100m long and 68m wide — about the size of 1.4 American football fields. International stadiums must use a slightly more specific size range. That's why some pitches feel bigger or smaller depending on the club!"
+        plainEnglish: "A standard pitch is roughly 100m long and 68m wide — about the size of 1.4 American football fields. International stadiums must use a slightly more specific size range. That's why some pitches feel bigger or smaller depending on the club!",
+        tableMarkdown: `
+| Boundary Type | Standard Size Range | International Range |
+| :--- | :--- | :--- |
+| **Touch Line (Length)** | 90m – 120m | 100m – 110m |
+| **Goal Line (Width)** | 45m – 90m | 64m – 75m |
+`
       }
     ]
   },
@@ -67,7 +73,13 @@ export const FIFA_LAWS = [
         title: "Substitutions",
         keywords: ["substitute", "sub", "swap", "change", "replace", "extra time", "fifth sub"],
         officialText: "In official competitions, teams are permitted a maximum of five substitutions, with an additional substitution in extra time. If a match goes to extra time, a team that has not used all its substitutions may use one more substitution in extra time, regardless of the number used in normal time.",
-        plainEnglish: "Teams get 5 substitutions in a normal game, plus a bonus 6th if extra time is played. This rule was introduced during COVID-19 and became permanent from 2022. You'll often see teams save one sub specifically for extra time — it's a tactical chess move."
+        plainEnglish: "Teams get 5 substitutions in a normal game, plus a bonus 6th if extra time is played. This rule was introduced during COVID-19 and became permanent from 2022. You'll often see teams save one sub specifically for extra time — it's a tactical chess move.",
+        tableMarkdown: `
+| Match Stage | Max Subs Allowed | Max Match Windows | Extra Time Bonus |
+| :--- | :--- | :--- | :--- |
+| **Normal Time** | 5 | 3 (excl. halftime) | None |
+| **Extra Time** | 6 (total) | 4 (total) | +1 sub, +1 window |
+`
       }
     ]
   },
@@ -290,7 +302,14 @@ export const FIFA_LAWS = [
         title: "Handball",
         keywords: ["handball", "hand", "arm", "deliberate", "natural", "accidental", "armpit", "elbow"],
         officialText: "It is an offence if a player: deliberately touches the ball with their hand/arm, touches the ball with their hand/arm when it has made their body unnaturally bigger, scores or creates a goal-scoring opportunity after touching the ball with their hand/arm.",
-        plainEnglish: "Handball is one of the most debated rules. 'Natural position' arms are generally fine — if your arm is tucked in and the ball hits it, usually no foul. But if your arm makes you wider/bigger than your natural body shape, it's handball. The armpit is included. Scoring a goal after ANY handball (even accidental) is disallowed."
+        plainEnglish: "Handball is one of the most debated rules. 'Natural position' arms are generally fine — if your arm is tucked in and the ball hits it, usually no foul. But if your arm makes you wider/bigger than your natural body shape, it's handball. The armpit is included. Scoring a goal after ANY handball (even accidental) is disallowed.",
+        tableMarkdown: `
+| Offence Type | Penalty Action | Card Discipline | VAR Reviewable? |
+| :--- | :--- | :--- | :--- |
+| **Deliberate Handball** | Direct Free Kick / Penalty | None (usually) | Yes (if penalty/DOGSO) |
+| **DOGSO Handball** | Direct Free Kick / Penalty | Red Card | Yes |
+| **Stopping Attack Handball** | Direct Free Kick / Penalty | Yellow Card | No |
+`
       },
       {
         id: "law-12-3",

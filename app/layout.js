@@ -39,7 +39,7 @@ export default function RootLayout({ children }) {
           <div className="max-w-[1400px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
             <span>© 2026 DECODED. AI World Cup Analytical Index. All rights reserved.</span>
             <div className="flex items-center space-x-5 font-bold uppercase tracking-wider text-[10px]">
-              <span className="text-[#1565c0]">IBM Granite 3.3</span>
+              <span className="text-[#1565c0]">IBM Granite 4.1</span>
               <span>Docling PDF Parser</span>
               <span>StatsBomb Open Data</span>
               <a href="/about" className="text-[#00c2a8] hover:text-white transition-colors">About</a>

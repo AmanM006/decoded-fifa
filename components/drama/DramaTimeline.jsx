@@ -143,11 +143,23 @@ export default function DramaTimeline() {
   const [aiText, setAiText] = useState(selectedMatch.graniteNarrative);
   const [isLoading, setIsLoading] = useState(false);
   const [aiStatus, setAiStatus] = useState("");
+  const [audience, setAudience] = useState("enthusiast");
+  const [guardianVerified, setGuardianVerified] = useState(false);
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
 
   useEffect(() => {
     setAiText(selectedMatch.graniteNarrative);
     setHoveredMinute(null);
   }, [selectedMatch]);
+
+  useEffect(() => {
+    const updateAudience = () => {
+      setAudience(localStorage.getItem("decoded_audience") || "enthusiast");
+    };
+    updateAudience();
+    window.addEventListener("decoded_audience_change", updateAudience);
+    return () => window.removeEventListener("decoded_audience_change", updateAudience);
+  }, []);
 
   useEffect(() => {
     drawChart(canvasRef.current, selectedMatch, hoveredMinute, setHoveredMinute);
@@ -190,8 +202,10 @@ export default function DramaTimeline() {
       keyMoments: selectedMatch.keyMoments.map(k => k.annotation).join("; ")
     };
 
-    const text = await queryGraniteAI("DRAMA", prompt, selectedMatch.graniteNarrative);
-    setAiText(text);
+    const res = await queryGraniteAI("DRAMA", prompt, selectedMatch.graniteNarrative, audience);
+    setAiText(res.text);
+    setGuardianVerified(res.guardianVerified);
+    setGuardianSource(res.guardianSource);
     setIsLoading(false);
   };
 
@@ -348,7 +362,7 @@ export default function DramaTimeline() {
 
           {/* IBM Granite Cultural Narrative */}
           <div>
-            <GranitePanel
+             <GranitePanel
               title="CULTURAL SENTIMENT NARRATIVE"
               icon={Heart}
               iconColor="#ff3b30"
@@ -357,6 +371,8 @@ export default function DramaTimeline() {
               status={aiStatus}
               className="min-h-[280px] border-[#1a1a2e]"
               badgeText="Granite Emotional AI"
+              guardianVerified={guardianVerified}
+              guardianSource={guardianSource}
             />
             <button
               onClick={handleGraniteDeepDive}

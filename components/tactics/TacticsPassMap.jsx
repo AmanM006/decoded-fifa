@@ -50,6 +50,73 @@ const PASSING_DATA = {
       { from: "varane", to: "kante", weight: 16 },
       { from: "umtiti", to: "pogba", weight: 13 }
     ]
+  },
+  "bra-ger-2014": {
+    team: "Germany",
+    nodes: [
+      { id: "kroos", name: "Toni Kroos (18)", x: 240, y: 130, r: 14, stats: { passes: 81, accuracy: "93%", keyPasses: 4, forward: 28 } },
+      { id: "khedira", name: "Sami Khedira (6)", x: 210, y: 200, r: 13, stats: { passes: 62, accuracy: "89%", keyPasses: 2, forward: 19 } },
+      { id: "schweinsteiger", name: "B. Schweinsteiger (7)", x: 160, y: 160, r: 14, stats: { passes: 76, accuracy: "91%", keyPasses: 1, forward: 14 } },
+      { id: "lahm", name: "Philipp Lahm (16)", x: 260, y: 270, r: 13, stats: { passes: 58, accuracy: "95%", keyPasses: 2, forward: 22 } },
+      { id: "ozil", name: "Mesut Özil (8)", x: 300, y: 90, r: 13, stats: { passes: 49, accuracy: "86%", keyPasses: 3, forward: 18 } },
+      { id: "muller", name: "Thomas Müller (13)", x: 340, y: 220, r: 12, stats: { passes: 38, accuracy: "82%", keyPasses: 3, forward: 12 } },
+      { id: "klose", name: "Miroslav Klose (11)", x: 390, y: 160, r: 12, stats: { passes: 24, accuracy: "79%", keyPasses: 1, forward: 5 } }
+    ],
+    edges: [
+      { from: "schweinsteiger", to: "kroos", weight: 24 },
+      { from: "schweinsteiger", to: "khedira", weight: 18 },
+      { from: "kroos", to: "khedira", weight: 15 },
+      { from: "kroos", to: "ozil", weight: 22 },
+      { from: "khedira", to: "muller", weight: 17 },
+      { from: "ozil", to: "klose", weight: 11 },
+      { from: "muller", to: "klose", weight: 9 },
+      { from: "lahm", to: "muller", weight: 20 },
+      { from: "kroos", to: "lahm", weight: 14 }
+    ]
+  },
+  "esp-ned-2010": {
+    team: "Spain",
+    nodes: [
+      { id: "xavi", name: "Xavi (#8)", x: 260, y: 160, r: 14, stats: { passes: 85, accuracy: "92%", keyPasses: 6, forward: 34 } },
+      { id: "iniesta", name: "Andrés Iniesta (#6)", x: 340, y: 180, r: 14, stats: { passes: 62, accuracy: "89%", keyPasses: 4, forward: 22 } },
+      { id: "alonso", name: "Xabi Alonso (#14)", x: 200, y: 130, r: 13, stats: { passes: 74, accuracy: "90%", keyPasses: 1, forward: 18 } },
+      { id: "busquets", name: "Sergio Busquets (#16)", x: 180, y: 220, r: 13, stats: { passes: 81, accuracy: "94%", keyPasses: 1, forward: 16 } },
+      { id: "villa", name: "David Villa (#7)", x: 360, y: 90, r: 12, stats: { passes: 29, accuracy: "81%", keyPasses: 2, forward: 8 } },
+      { id: "puyol", name: "Carles Puyol (#5)", x: 110, y: 110, r: 12, stats: { passes: 56, accuracy: "96%", keyPasses: 1, forward: 11 } },
+      { id: "pique", name: "Gerard Piqué (#3)", x: 110, y: 210, r: 12, stats: { passes: 61, accuracy: "95%", keyPasses: 0, forward: 9 } }
+    ],
+    edges: [
+      { from: "busquets", to: "alonso", weight: 22 },
+      { from: "alonso", to: "xavi", weight: 26 },
+      { from: "busquets", to: "xavi", weight: 19 },
+      { from: "xavi", to: "iniesta", weight: 31 },
+      { from: "iniesta", to: "villa", weight: 14 },
+      { from: "xavi", to: "villa", weight: 12 },
+      { from: "pique", to: "busquets", weight: 18 },
+      { from: "puyol", to: "alonso", weight: 15 }
+    ]
+  },
+  "eng-col-2018": {
+    team: "Colombia",
+    nodes: [
+      { id: "cuadrado", name: "Juan Cuadrado (#11)", x: 280, y: 250, r: 13, stats: { passes: 48, accuracy: "83%", keyPasses: 3, forward: 19 } },
+      { id: "james", name: "James Rodríguez (#10)", x: 280, y: 120, r: 14, stats: { passes: 54, accuracy: "86%", keyPasses: 4, forward: 24 } },
+      { id: "falcao", name: "Radamel Falcao (#9)", x: 380, y: 160, r: 12, stats: { passes: 21, accuracy: "76%", keyPasses: 1, forward: 5 } },
+      { id: "barrios", name: "Wilmar Barrios (#5)", x: 190, y: 180, r: 13, stats: { passes: 65, accuracy: "91%", keyPasses: 1, forward: 12 } },
+      { id: "sanchez", name: "Carlos Sánchez (#6)", x: 170, y: 100, r: 12, stats: { passes: 52, accuracy: "88%", keyPasses: 0, forward: 11 } },
+      { id: "mina", name: "Yerry Mina (#13)", x: 100, y: 130, r: 13, stats: { passes: 41, accuracy: "93%", keyPasses: 1, forward: 7 } },
+      { id: "mojica", name: "Johan Mojica (#17)", x: 220, y: 60, r: 12, stats: { passes: 39, accuracy: "82%", keyPasses: 2, forward: 14 } }
+    ],
+    edges: [
+      { from: "sanchez", to: "barrios", weight: 16 },
+      { from: "barrios", to: "james", weight: 20 },
+      { from: "james", to: "cuadrado", weight: 18 },
+      { from: "james", to: "falcao", weight: 12 },
+      { from: "cuadrado", to: "falcao", weight: 14 },
+      { from: "mojica", to: "james", weight: 15 },
+      { from: "mina", to: "sanchez", weight: 11 },
+      { from: "sanchez", to: "mojica", weight: 13 }
+    ]
   }
 };
 

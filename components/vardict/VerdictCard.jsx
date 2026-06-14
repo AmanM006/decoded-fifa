@@ -3,8 +3,18 @@
 import React from "react";
 import { CheckCircle2, AlertTriangle, XCircle } from "lucide-react";
 
-export default function VerdictCard({ verdict = "CORRECT", confidence = 90, lawCited = "Law" }) {
-  const getVerdictStyles = (v) => {
+export default function VerdictCard({ verdict = "CORRECT", confidence = 90, lawCited = "Law", isTooClose = false }) {
+  const getVerdictStyles = (v, tooClose) => {
+    if (tooClose) {
+      return {
+        bg: "bg-[#1a1300]",
+        border: "border-[#ffd700]",
+        text: "text-[#ffd700]",
+        iconColor: "#ffd700",
+        icon: AlertTriangle,
+        label: "TOO CLOSE TO CALL"
+      };
+    }
     switch (v) {
       case "CORRECT":
         return {
@@ -45,7 +55,7 @@ export default function VerdictCard({ verdict = "CORRECT", confidence = 90, lawC
     }
   };
 
-  const config = getVerdictStyles(verdict);
+  const config = getVerdictStyles(verdict, isTooClose);
   const IconComp = config.icon;
 
   return (
