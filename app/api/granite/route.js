@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 
 /**
- * IBM watsonx.ai — Granite 4.1 & Granite Guardian API Route
- * Flow: API key → IAM token → watsonx.ai text generation (Granite 4.1) → safety check (Granite Guardian)
+ * IBM watsonx.ai — Granite 3.0 & Granite Guardian API Route
+ * Flow: API key → IAM token → watsonx.ai text generation (Granite 3.0) → safety check (Granite Guardian)
  */
 
 async function getIAMToken(apiKey) {
@@ -160,7 +160,7 @@ export async function POST(req) {
       return NextResponse.json({
         text,
         guardianVerified: true,
-        guardianSource: "Granite Guardian 4.1 (Local Verification)"
+        guardianSource: "Granite Guardian 3.0 (Local Verification)"
       });
     }
 
@@ -301,7 +301,7 @@ Key Moments: ${promptData.keyMoments}
     // Get IAM token
     const iamToken = await getIAMToken(apiKey);
 
-    // Call IBM Granite 4.1 on watsonx.ai
+    // Call IBM Granite 3.0 on watsonx.ai
     const watsonRes = await fetch(
       `https://${region}.ml.cloud.ibm.com/ml/v1/text/generation?version=2023-05-29`,
       {
@@ -349,7 +349,7 @@ Key Moments: ${promptData.keyMoments}
     return NextResponse.json({
       text,
       guardianVerified,
-      guardianSource: "Granite Guardian 4.1"
+      guardianSource: "Granite Guardian 3.0"
     });
 
   } catch (error) {

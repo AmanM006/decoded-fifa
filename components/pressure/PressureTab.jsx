@@ -77,7 +77,7 @@ export default function PressureTab() {
 
   const [audience, setAudience] = useState("enthusiast");
   const [guardianVerified, setGuardianVerified] = useState(false);
-  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 3.0");
 
   // Sandbox Mode States (Option 1)
   const [sandboxMode, setSandboxMode] = useState(false);

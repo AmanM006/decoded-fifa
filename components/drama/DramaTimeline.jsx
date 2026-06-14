@@ -145,7 +145,7 @@ export default function DramaTimeline() {
   const [aiStatus, setAiStatus] = useState("");
   const [audience, setAudience] = useState("enthusiast");
   const [guardianVerified, setGuardianVerified] = useState(false);
-  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 3.0");
 
   useEffect(() => {
     setAiText(selectedMatch.graniteNarrative);

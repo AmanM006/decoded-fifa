@@ -50,7 +50,7 @@ export default function GranitePanel({
   badgeText = "IBM Granite",
   confidence = null,
   guardianVerified = false,
-  guardianSource = "Granite Guardian 4.1",
+  guardianSource = "Granite Guardian 3.0",
 }) {
   const [audience, setAudience] = useState("enthusiast");
 
@@ -130,7 +130,7 @@ export default function GranitePanel({
               <span className="text-[11px] text-[#5b9cf6] font-inter font-semibold block animate-pulse">
                 {status || "Invoking IBM Granite..."}
               </span>
-              <span className="text-[9px] text-[#333] font-inter block">granite-4.1-8b-instruct · watsonx.ai</span>
+              <span className="text-[9px] text-[#333] font-inter block">granite-3-8b-instruct · watsonx.ai</span>
             </div>
           </div>
         ) : (
@@ -149,7 +149,7 @@ export default function GranitePanel({
         <div className="mt-4 pt-3 border-t border-[#111122] flex items-center justify-between shrink-0 flex-wrap gap-2">
           <div className="flex items-center space-x-1.5">
             <Hexagon size={9} color="#1565c0" fill="#1565c0" opacity={0.6} />
-            <span className="text-[9px] text-[#333] font-inter font-bold">granite-4.1-8b-instruct</span>
+            <span className="text-[9px] text-[#333] font-inter font-bold">granite-3-8b-instruct</span>
           </div>
 
           {guardianVerified && text && !isLoading && (

@@ -63,7 +63,7 @@ export default function AboutContent() {
           </div>
           <h2 className="font-teko text-[26px] text-white uppercase tracking-wider font-bold">2. Compliance & Safeguards</h2>
           <p className="text-[12.5px] text-[#8e8e9f] leading-relaxed">
-            AI models are prone to hallucinating game rules under pressure. We implement <strong>IBM Granite Guardian 4.1</strong> validation checks. 
+            AI models are prone to hallucinating game rules under pressure. We implement <strong>IBM Granite Guardian 3.0</strong> validation checks. 
             If any tactical report or law lookup violates safety bounds, the request fail-closes instantly into a deterministic, pre-signed FIFA official law-citing floor. No rogue data reaches the screen.
           </p>
         </div>

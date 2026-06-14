@@ -114,12 +114,12 @@ export default function JudgesPanel() {
       setGuardianVerifiedResult({
         verified: true,
         response: "The referee's decision to disallow the goal is correct under Law 11, as Antoine Griezmann was in an active offside position interfering with the defender's line of sight.",
-        source: "Granite Guardian 4.1"
+        source: "Granite Guardian 3.0"
       });
     } else {
       setGuardianVerifiedResult({
         verified: false,
-        response: `⚠️ SAFETY INTERCEPT (Granite Guardian 4.1):
+        response: `⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):
 Under enterprise compliance protocols, this generated response was flagged as potentially unsafe or containing rule hallucinations.
 
 SAFE LAW DEGRADATION:
@@ -127,7 +127,7 @@ SAFE LAW DEGRADATION:
 - Official Text: It is an offence if a player deliberately touches the ball with their hand/arm...
 
 The AI reasoning engine has failed-closed to prevent rule hallucinations, reverting to the pre-signed official rulebook text.`,
-        source: "Granite Guardian 4.1"
+        source: "Granite Guardian 3.0"
       });
     }
     setGuardianLoading(false);
@@ -391,7 +391,7 @@ The AI reasoning engine has failed-closed to prevent rule hallucinations, revert
 
               <div className="p-4 bg-black/60 border border-[#222232] rounded text-[11.5px] min-h-[120px] font-mono whitespace-pre-wrap">
                 {guardianLoading ? (
-                  <span className="text-[#ffd700] animate-pulse block">Guardian 4.1 analyzing safety coordinates...</span>
+                  <span className="text-[#ffd700] animate-pulse block">Guardian 3.0 analyzing safety coordinates...</span>
                 ) : guardianVerifiedResult ? (
                   <div className="space-y-2">
                     <div className="flex justify-between items-center pb-2 border-b border-[#222232]/40 text-[9px] text-[#8e8e9f] font-bold">

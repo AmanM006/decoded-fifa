@@ -105,7 +105,7 @@ export default function AskTheRef() {
   const [aiStatus, setAiStatus] = useState("");
   const [audience, setAudience] = useState("enthusiast");
   const [guardianVerified, setGuardianVerified] = useState(false);
-  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 3.0");
   const [corpusHash, setCorpusHash] = useState("");
   const [corpusStatus, setCorpusStatus] = useState("verifying");
   const inputRef = useRef(null);
@@ -168,7 +168,7 @@ export default function AskTheRef() {
     const fallback = `📖 ${result.article.title} — ${result.law.title}\n\n${result.article.plainEnglish}\n\n— Based on FIFA Laws of the Game (Official 2024 Edition, parsed via Docling RAG)`;
     const res = await queryGraniteAI("LAWS", prompt, fallback, audience);
     if (res.guardianVerified === false) {
-      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 4.1):
+      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):
 The safety verification layer has flagged this query/response as out-of-bounds or containing compliance risks. 
 
 SAFE LAW DEGRADATION:

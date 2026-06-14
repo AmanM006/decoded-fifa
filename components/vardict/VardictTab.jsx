@@ -39,7 +39,7 @@ export default function VardictTab() {
 
   const [audience, setAudience] = useState("enthusiast");
   const [guardianVerified, setGuardianVerified] = useState(false);
-  const [guardianSource, setGuardianSource] = useState("Granite Guardian 4.1");
+  const [guardianSource, setGuardianSource] = useState("Granite Guardian 3.0");
 
   useEffect(() => {
     setAiText(selectedIncident.graniteAnalysis);
@@ -129,7 +129,7 @@ export default function VardictTab() {
 
     const res = await queryGraniteAI("VARDICT", promptData, selectedIncident.graniteAnalysis, audience);
     if (res.guardianVerified === false) {
-      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 4.1):
+      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):
 Under enterprise compliance protocols, this generated response was flagged as potentially unsafe or containing rule hallucinations.
 
 SAFE LAW DEGRADATION:
