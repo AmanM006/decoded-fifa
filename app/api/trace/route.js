@@ -18,7 +18,7 @@ export async function GET() {
       durationMs: 1450,
       timestamp: new Date(Date.now() - 2000).toISOString(),
       status: "SUCCESS",
-      meta: { model: "ibm/granite-3-3-8b-instruct", promptTokens: 412, generatedTokens: 189 }
+      meta: { model: "ibm/granite-3-8b-instruct", promptTokens: 412, generatedTokens: 189 }
     },
     {
       id: "span-guardian-gate",

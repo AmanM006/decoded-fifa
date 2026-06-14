@@ -234,7 +234,7 @@ The AI reasoning engine has failed-closed to prevent rule hallucinations, revert
 
               {/* Check 3: Query status */}
               <div className="flex items-center justify-between p-2.5 bg-black/40 border border-[#222232]/50 text-[11px]">
-                <span className="text-[#8e8e9f] font-semibold">Granite 3.3 Text Generation</span>
+                <span className="text-[#8e8e9f] font-semibold">Granite 3.0 Text Generation</span>
                 {watsonStatus === "loading" && <span className="text-[#ffd700] animate-pulse">CONNECTING...</span>}
                 {watsonStatus === "success" && (
                   <span className="text-[#00c2a8] font-bold flex items-center gap-1">

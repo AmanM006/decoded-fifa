@@ -60,7 +60,7 @@ async function runDiagnostic() {
     const token = iamData.access_token;
     console.log("✓ Stage 1 SUCCESS: IAM token generated successfully.\n");
 
-    console.log("Stage 2: Querying watsonx.ai Text Generation API (Granite 4.1)...");
+    console.log("Stage 2: Querying watsonx.ai Text Generation API (Granite 3.0)...");
     const watsonRes = await fetch(
       `https://${region}.ml.cloud.ibm.com/ml/v1/text/generation?version=2023-05-29`,
       {
@@ -70,7 +70,7 @@ async function runDiagnostic() {
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
-          model_id: "ibm/granite-4-1-8b-instruct",
+          model_id: "ibm/granite-3-8b-instruct",
           input: "<|user|>\nHello. Output exactly the word 'SUCCESS' if you read this.\n<|assistant|>",
           parameters: {
             decoding_method: "greedy",

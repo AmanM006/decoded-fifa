@@ -111,7 +111,7 @@ export default function AboutContent() {
               </div>
               <div className="flex items-center space-x-2 bg-black/40 border border-[#222232] px-3.5 py-2">
                 <Cpu size={14} className="text-[#2b66ff]" />
-                <span className="font-mono text-[10px] text-white font-bold">IBM Granite 3.3 Legal Grounding</span>
+                <span className="font-mono text-[10px] text-white font-bold">IBM Granite 3.0 Legal Grounding</span>
               </div>
             </div>
           </div>
