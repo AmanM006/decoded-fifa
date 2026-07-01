@@ -63,15 +63,16 @@ export default function JudgesPanel() {
   };
 
   // Run Zod Validation Contract
-  const runZodValidation = () => {
+  const runZodValidation = async () => {
     try {
       const parsed = JSON.parse(zodTestInput);
-      const check = MatchTelemetrySchema.safeParse(parsed);
-      if (check.success) {
-        setZodResult({ status: "SUCCESS", data: check.data });
-      } else {
-        setZodResult({ status: "INVALID", errors: check.error.errors });
-      }
+      const res = await fetch("/api/zod-validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+      const data = await res.json();
+      setZodResult(data);
     } catch (err) {
       setZodResult({ status: "JSON_ERROR", message: err.message });
     }
@@ -94,12 +95,14 @@ export default function JudgesPanel() {
   const checkHashSignature = async () => {
     setLawsStatus("loading");
     try {
-      const msgUint8 = new TextEncoder().encode(JSON.stringify(FIFA_LAWS));
-      const hashBuffer = await crypto.subtle.digest("SHA-256", msgUint8);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashHex = hashArray.map(b => b.toString(16).padStart(2, "0")).join("");
-      setLawsHash(hashHex);
-      setLawsStatus("verified");
+      const res = await fetch("/api/laws-integrity");
+      const data = await res.json();
+      if (data.status === "verified") {
+        setLawsHash(data.hash);
+        setLawsStatus("verified");
+      } else {
+        setLawsStatus("failed");
+      }
     } catch (err) {
       setLawsStatus("failed");
     }
@@ -108,25 +111,18 @@ export default function JudgesPanel() {
   // Test Guardian Safety Gate Intercept
   const runGuardianTest = async (isSafe) => {
     setGuardianLoading(true);
-    // Simulate query to the API
-    await new Promise(r => setTimeout(r, 1000));
-    if (isSafe) {
-      setGuardianVerifiedResult({
-        verified: true,
-        response: "The referee's decision to disallow the goal is correct under Law 11, as Antoine Griezmann was in an active offside position interfering with the defender's line of sight.",
-        source: "Granite Guardian 3.0"
+    try {
+      const res = await fetch("/api/guardian-test", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isSafe }),
       });
-    } else {
+      const data = await res.json();
+      setGuardianVerifiedResult(data);
+    } catch (err) {
       setGuardianVerifiedResult({
         verified: false,
-        response: `⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):
-Under enterprise compliance protocols, this generated response was flagged as potentially unsafe or containing rule hallucinations.
-
-SAFE LAW DEGRADATION:
-- Law Article: Law 12 — Fouls and Misconduct
-- Official Text: It is an offence if a player deliberately touches the ball with their hand/arm...
-
-The AI reasoning engine has failed-closed to prevent rule hallucinations, reverting to the pre-signed official rulebook text.`,
+        response: `Safety check query failed: ${err.message}`,
         source: "Granite Guardian 3.0"
       });
     }
