@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Search, BookOpen, ChevronRight, Zap, X, MessageCircle, FileText } from "lucide-react";
 import { FIFA_LAWS } from "../../data/laws";
-import { queryGraniteAI } from "../../lib/granite";
+import { streamGraniteAI, queryGraniteAI } from "../../lib/granite";
 import GranitePanel from "../shared/GranitePanel";
 
 function StructuredTable({ markdown }) {
@@ -150,11 +150,11 @@ export default function AskTheRef() {
     setSelectedArticle(result);
     setAiText("");
     setIsLoading(true);
-    setAiStatus("Parsing FIFA Law document...");
-    await new Promise(r => setTimeout(r, 500));
-    setAiStatus("Retrieving Docling-parsed article...");
-    await new Promise(r => setTimeout(r, 500));
-    setAiStatus("Translating legal text with IBM Granite...");
+    setAiStatus("Parsing Docling law corpus...");
+    await new Promise(r => setTimeout(r, 400));
+    setAiStatus("Retrieving matched article...");
+    await new Promise(r => setTimeout(r, 400));
+    setAiStatus("Streaming IBM Granite analysis...");
 
     const prompt = {
       question: submitted,
@@ -165,25 +165,41 @@ export default function AskTheRef() {
       plainEnglish: result.article.plainEnglish
     };
 
-    const fallback = `📖 ${result.article.title} — ${result.law.title}\n\n${result.article.plainEnglish}\n\n— Based on FIFA Laws of the Game (Official 2024 Edition, parsed via Docling RAG)`;
-    const res = await queryGraniteAI("LAWS", prompt, fallback, audience);
-    if (res.guardianVerified === false) {
-      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):
-The safety verification layer has flagged this query/response as out-of-bounds or containing compliance risks. 
+    const fallback = `📖 ${result.article.title} — ${result.law.title}\n\n${result.article.plainEnglish}\n\n— Based on FIFA Laws of the Game (Official 2024 Edition, parsed via Docling)`;
 
-SAFE LAW DEGRADATION:
-- Rule: Law ${result.law.number} — ${result.law.title}
-- Article: ${result.article.title}
-- Official Text: ${result.article.officialText}
+    let streamFailed = false;
 
-To ensure complete compliance and eliminate hallucination risk, the system has reverted to the official FIFA Laws text.`);
-      setGuardianVerified(false);
-    } else {
-      setAiText(res.text);
-      setGuardianVerified(res.guardianVerified);
-    }
-    setGuardianSource(res.guardianSource);
-    setIsLoading(false);
+    await streamGraniteAI(
+      "LAWS",
+      prompt,
+      (token) => {
+        setAiText(prev => prev + token);
+        setIsLoading(false);
+        setAiStatus("");
+      },
+      ({ guardianVerified: gv, guardianSource: gs }) => {
+        if (gv === false) {
+          setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):\nThe safety verification layer flagged this response.\n\nSAFE LAW DEGRADATION:\n- Rule: Law ${result.law.number} — ${result.law.title}\n- Article: ${result.article.title}\n- Official Text: ${result.article.officialText}\n\nReverted to official FIFA Laws text to eliminate hallucination risk.`);
+          setGuardianVerified(false);
+        } else {
+          setGuardianVerified(true);
+        }
+        setGuardianSource(gs);
+        setIsLoading(false);
+      },
+      async () => {
+        // SSE failed — fall back to JSON query
+        streamFailed = true;
+        const res = await queryGraniteAI("LAWS", prompt, fallback, audience);
+        setAiText(res.text);
+        setGuardianVerified(res.guardianVerified);
+        setGuardianSource(res.guardianSource);
+        setIsLoading(false);
+      },
+      audience
+    );
+
+    if (!streamFailed) setIsLoading(false);
   };
 
   useEffect(() => {

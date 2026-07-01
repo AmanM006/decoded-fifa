@@ -7,7 +7,7 @@ import VerdictCard from "./VerdictCard";
 import GranitePanel from "../shared/GranitePanel";
 import DataLabel from "../shared/DataLabel";
 import LimbTrackingHUD from "./LimbTrackingHUD";
-import { queryGraniteAI } from "../../lib/granite";
+import { streamGraniteAI, queryGraniteAI } from "../../lib/granite";
 import { 
   AlertOctagon, 
   MapPin, 
@@ -109,12 +109,10 @@ export default function VardictTab() {
 
   const triggerLegalAnalysis = async () => {
     setIsAiLoading(true);
-    setAiStatus("Locating relevant FIFA Article sections...");
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setAiStatus("Running Docling RAG extraction context...");
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setAiStatus("Verifying call via IBM Granite law analyst...");
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    setAiText("");
+    setAiStatus("Locating FIFA Article sections...");
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    setAiStatus("Streaming IBM Granite law analysis...");
 
     const promptData = {
       match: selectedIncident.match,
@@ -127,23 +125,24 @@ export default function VardictTab() {
       players: selectedIncident.players
     };
 
-    const res = await queryGraniteAI("VARDICT", promptData, selectedIncident.graniteAnalysis, audience);
-    if (res.guardianVerified === false) {
-      setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):
-Under enterprise compliance protocols, this generated response was flagged as potentially unsafe or containing rule hallucinations.
-
-SAFE LAW DEGRADATION:
-- Law Article: ${selectedIncident.lawCited}
-- Official Text: ${selectedIncident.lawExcerpt}
-
-The AI reasoning engine has failed-closed to prevent rule hallucinations, reverting to the pre-signed official rulebook text.`);
-      setGuardianVerified(false);
-    } else {
-      setAiText(res.text);
-      setGuardianVerified(res.guardianVerified);
-    }
-    setGuardianSource(res.guardianSource);
-    setIsAiLoading(false);
+    await streamGraniteAI(
+      "VARDICT",
+      promptData,
+      (token) => { setAiText(prev => prev + token); setIsAiLoading(false); setAiStatus(""); },
+      ({ guardianVerified: gv, guardianSource: gs }) => {
+        if (gv === false) {
+          setAiText(`⚠️ SAFETY INTERCEPT (Granite Guardian 3.0):\nThis response was flagged as potentially unsafe.\n\nSAFE LAW DEGRADATION:\n- Law Article: ${selectedIncident.lawCited}\n- Official Text: ${selectedIncident.lawExcerpt}\n\nReverted to pre-signed official rulebook text.`);
+          setGuardianVerified(false);
+        } else { setGuardianVerified(true); }
+        setGuardianSource(gs);
+        setIsAiLoading(false);
+      },
+      async () => {
+        const res = await queryGraniteAI("VARDICT", promptData, selectedIncident.graniteAnalysis, audience);
+        setAiText(res.text); setGuardianVerified(res.guardianVerified); setGuardianSource(res.guardianSource); setIsAiLoading(false);
+      },
+      audience
+    );
   };
 
   const getTypePillColor = (type) => {

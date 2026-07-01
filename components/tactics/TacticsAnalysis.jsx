@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import DataLabel from "../shared/DataLabel";
 import GranitePanel from "../shared/GranitePanel";
 import { Brain, Sparkles, TrendingUp } from "lucide-react";
-import { queryGraniteAI } from "../../lib/granite";
+import { streamGraniteAI, queryGraniteAI } from "../../lib/granite";
 
 export default function TacticsAnalysis({ corner, matchName, onLoadCorner, aiText, setAiText }) {
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -25,12 +25,10 @@ export default function TacticsAnalysis({ corner, matchName, onLoadCorner, aiTex
   const handleTacticalAnalysis = async () => {
     if (!corner) return;
     setIsAiLoading(true);
-    setAiStatus("Analyzing player spatial matrix...");
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setAiStatus("Retrieving zonal marking data...");
-    await new Promise((resolve) => setTimeout(resolve, 600));
-    setAiStatus("Running IBM Granite 3.0 model...");
-    await new Promise((resolve) => setTimeout(resolve, 600));
+    setAiText("");
+    setAiStatus("Analyzing spatial matrix...");
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    setAiStatus("Streaming IBM Granite analysis...");
 
     const promptData = {
       match: matchName,
@@ -42,11 +40,17 @@ export default function TacticsAnalysis({ corner, matchName, onLoadCorner, aiTex
       details: corner.tacticalBreakdown
     };
 
-    const res = await queryGraniteAI("TACTICS", promptData, corner.tacticalBreakdown, audience);
-    setAiText(res.text);
-    setGuardianVerified(res.guardianVerified);
-    setGuardianSource(res.guardianSource);
-    setIsAiLoading(false);
+    await streamGraniteAI(
+      "TACTICS",
+      promptData,
+      (token) => { setAiText(prev => prev + token); setIsAiLoading(false); setAiStatus(""); },
+      ({ guardianVerified: gv, guardianSource: gs }) => { setGuardianVerified(gv); setGuardianSource(gs); setIsAiLoading(false); },
+      async () => {
+        const res = await queryGraniteAI("TACTICS", promptData, corner.tacticalBreakdown, audience);
+        setAiText(res.text); setGuardianVerified(res.guardianVerified); setGuardianSource(res.guardianSource); setIsAiLoading(false);
+      },
+      audience
+    );
   };
 
   if (!corner) return null;

@@ -2,7 +2,7 @@
 
 import React, { useRef, useEffect, useState, useCallback } from "react";
 import { DRAMA_MATCHES } from "../../data/drama";
-import { queryGraniteAI } from "../../lib/granite";
+import { streamGraniteAI, queryGraniteAI } from "../../lib/granite";
 import GranitePanel from "../shared/GranitePanel";
 import { Heart, Zap, Flame, Cpu, ChevronDown } from "lucide-react";
 
@@ -187,11 +187,10 @@ export default function DramaTimeline() {
 
   const handleGraniteDeepDive = async () => {
     setIsLoading(true);
-    setAiStatus("Analysing historical match commentary...");
-    await new Promise(r => setTimeout(r, 600));
-    setAiStatus("Extracting emotional arc data...");
-    await new Promise(r => setTimeout(r, 600));
-    setAiStatus("Generating IBM Granite cultural narrative...");
+    setAiText("");
+    setAiStatus("Analysing match commentary...");
+    await new Promise(r => setTimeout(r, 400));
+    setAiStatus("Streaming IBM Granite analysis...");
 
     const prompt = {
       match: selectedMatch.title,
@@ -202,11 +201,28 @@ export default function DramaTimeline() {
       keyMoments: selectedMatch.keyMoments.map(k => k.annotation).join("; ")
     };
 
-    const res = await queryGraniteAI("DRAMA", prompt, selectedMatch.graniteNarrative, audience);
-    setAiText(res.text);
-    setGuardianVerified(res.guardianVerified);
-    setGuardianSource(res.guardianSource);
-    setIsLoading(false);
+    await streamGraniteAI(
+      "DRAMA",
+      prompt,
+      (token) => {
+        setAiText(prev => prev + token);
+        setIsLoading(false);
+        setAiStatus("");
+      },
+      ({ guardianVerified: gv, guardianSource: gs }) => {
+        setGuardianVerified(gv);
+        setGuardianSource(gs);
+        setIsLoading(false);
+      },
+      async () => {
+        const res = await queryGraniteAI("DRAMA", prompt, selectedMatch.graniteNarrative, audience);
+        setAiText(res.text);
+        setGuardianVerified(res.guardianVerified);
+        setGuardianSource(res.guardianSource);
+        setIsLoading(false);
+      },
+      audience
+    );
   };
 
   const culturalColor = selectedMatch.color;

@@ -6,7 +6,7 @@ import PressureGauge from "./PressureGauge";
 import PressurePentagon from "./PressurePentagon";
 import GranitePanel from "../shared/GranitePanel";
 import DataLabel from "../shared/DataLabel";
-import { queryGraniteAI } from "../../lib/granite";
+import { streamGraniteAI, queryGraniteAI } from "../../lib/granite";
 import { 
   ChevronRight, 
   AlertTriangle, 
@@ -219,12 +219,10 @@ RESULT: ${outcome}.`;
 
   const runIBMAnalysis = async () => {
     setIsAiLoading(true);
+    setAiText("");
     setAiStatus("Constructing stress index context...");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setAiStatus("Analyzing decibel acoustics data...");
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setAiStatus("Querying IBM Granite 3.0 psychology expert...");
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 400));
+    setAiStatus("Streaming IBM Granite analysis...");
 
     const promptData = {
       player: active.player,
@@ -235,11 +233,28 @@ RESULT: ${outcome}.`;
       factors: active.factors
     };
 
-    const res = await queryGraniteAI("PRESSURE", promptData, active.graniteAnalysis, audience);
-    setAiText(res.text);
-    setGuardianVerified(res.guardianVerified);
-    setGuardianSource(res.guardianSource);
-    setIsAiLoading(false);
+    await streamGraniteAI(
+      "PRESSURE",
+      promptData,
+      (token) => {
+        setAiText(prev => prev + token);
+        setIsAiLoading(false);
+        setAiStatus("");
+      },
+      ({ guardianVerified: gv, guardianSource: gs }) => {
+        setGuardianVerified(gv);
+        setGuardianSource(gs);
+        setIsAiLoading(false);
+      },
+      async () => {
+        const res = await queryGraniteAI("PRESSURE", promptData, active.graniteAnalysis, audience);
+        setAiText(res.text);
+        setGuardianVerified(res.guardianVerified);
+        setGuardianSource(res.guardianSource);
+        setIsAiLoading(false);
+      },
+      audience
+    );
   };
 
   const getBorderColor = (score) => {
