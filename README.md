@@ -1,7 +1,9 @@
-# ⚡ DECODED — FIFA World Cup 2026 AI Platform
+# ⚡ DECODED — World Cup 2026 AI Explainability Platform
 
-> *"Every goal. Every decision. Every moment of 
-> pressure. Finally decoded."*
+> *"VAR is a system of cameras. Docling is a system of rules. DECODED makes the difference visible."*
+
+🚀 **Live Deployment URL**: [https://fifa-pink.vercel.app](https://fifa-pink.vercel.app)  
+🎥 **Platform Demo Video**: [https://github.com/AmanM006/decoded-fifa](https://github.com/AmanM006/decoded-fifa) *(Note: replace with video URL before final submission)*
 
 ![IBM Granite](https://img.shields.io/badge/IBM-Granite-052FAD)
 ![watsonx.ai](https://img.shields.io/badge/watsonx-AI-052FAD)
@@ -13,273 +15,180 @@
 
 ## 🔴 The Problem
 
-The FIFA World Cup 2026 will be watched by **6 billion 
-people** — yet most will understand very little of 
-what they're actually seeing.
+The FIFA World Cup 2026 will be watched by **6 billion people** — yet most fans will remain blind to the spatial, mathematical, and regulatory logic governing the pitch.
 
-- **85%** of football fans admit they're confused by VAR
-- 48 participating nations include fan communities 
-  who've never had these rules explained
-- Elite clubs like Liverpool and FC Barcelona use 
-  AI tools costing millions — inaccessible to fans
-- Broadcasters show the moment. Nobody explains the WHY.
+*   **85%** of football fans admit they're confused by VAR verdicts.
+*   Offside lines are drawn on television screens with claims of absolute precision, hiding the native **±3.0cm optical uncertainty limits** of camera feeds.
+*   Elite clubs utilize million-dollar data science platforms (tracking expected threat, space occupancy, and transition shapes) that are completely hidden from fans and media.
+*   Broadcasters show *what* happened, but can never explain *why*.
 
 DECODED closes that gap.
 
 ---
 
+## 🎯 Why This Matters: The Platform Mission
+
+DECODED addresses the core challenge of **explainability, trust, and accessibility at a global scale**. By converting raw spatial telemetry and dense laws into interactive 2D pitch meshes, manual offside calibration tools, and multi-dialect chat responses, we bridge the gap between black-box AI algorithms and the everyday fan. We turn complex data points into emotional understanding, ensuring tournament transparency is accessible to every community worldwide.
+
+---
+
 ## 💡 What DECODED Does
 
-Five AI-powered modules. One platform. 
-Every football moment — explained.
+DECODED parses raw StatsBomb event sequences, StatsBomb 360 player coordinates, and official FIFA Law PDFs.
+
+It then:
+*   Visualizes full-match spatial events on an interactive HTML5 2D Pitch Canvas.
+*   Allows fans to drag-and-drop player tokens in a **What-If Sandbox** to test alternative pass trajectories and defensive shapes.
+*   Renders a **29-Point SAOT Skeletal HUD** to let users manually calibrate VAR offside lines and discover physical uncertainty boundaries.
+*   Decodes complex rules via a multilingual **Multi-Agent Swarm** grounded in official laws parsed by **Docling**.
+*   Explains driver-level parameters (Vision, Risk, Execution, Pressure) using **IBM Granite AI**, grounded in spatial data.
 
 ---
 
-## 🌟 Features
+## 🧬 The 5 Decision DNA Dimensions
 
-### 🎯 Module 1 — Tactics AI
-- Reconstructs real corner kicks from famous World Cup 
-  matches using **StatsBomb open data**
-- Live 2D pitch canvas showing player runs, target 
-  zones, ball trajectories, xG probabilities
-- Interactive passing network — click any player 
-  to inspect passes, completion rate, key passes
-- **IBM Granite** generates tactical narratives 
-  explaining WHY plays succeeded or failed
-- Matches: France vs Croatia 2018, Argentina vs 
-  France 2022, Brazil vs Germany 2014
+Every StatsBomb action is evaluated across 5 spatial and mathematical parameters to score its quality:
 
-### 🧠 Module 2 — Pressure Index
-**The CRUCIBLE SCORE** — a 5-dimensional psychological 
-fingerprint measuring player mental state at 
-high-stakes World Cup moments.
-
-**5 DNA Metrics:**
-| Metric | Measures |
-|--------|----------|
-| Composure | Emotional stability under stress |
-| Clutch Capability | Historical big-moment performance |
-| Stamina Index | Physical fatigue impact |
-| Crowd Pressure Insulation | Resistance to 88k+ crowd |
-| Big Game Experience | Tournament pedigree |
-
-**Interactive features:**
-- **Stress Sandbox** — sliders for crowd size, VAR 
-  delay, fatigue. Hexagon morphs in real time.
-- **Acoustic Wave Visualizer** — toggle Moroccan 
-  Whistles, Argentine Drums, or Deafening Silence. 
-  Watch composure index change.
-- **Pressure Hall of Fame** — Mbappe 9.2, 
-  Coman 9.4, Baggio 9.8
-
-### ⚖️ Module 3 — VARdict
-- Calibrated pitch canvas reconstruction of 
-  controversial VAR decisions
-- **29-point SAOT Limb-Tracking HUD** — renders 
-  the full skeletal mesh used by Semi-Automated 
-  Offside Technology, showing exact body part 
-  positions to centimeter precision
-- **Interactive Manual Calibrator** — drag the 
-  offside line yourself to understand margins
-- **Referee Decision Lab** — rule on the incident 
-  before the official verdict is revealed
-- **IBM Granite** delivers legal verdict grounded 
-  in exact FIFA Law article
-- Global fan poll showing worldwide opinion split
-
-### 📖 Module 4 — Ask the Ref
-- Semantic RAG search over **FIFA Laws of the Game 
-  2024** parsed by **Docling**
-- Plain English questions → exact FIFA clause 
-  retrieved and highlighted
-- IBM Granite translates dense legal jargon into 
-  friendly, simple football terms
-- Example questions:
-  - "Can you score directly from a throw-in?"
-  - "What counts as a handball?"
-  - "When should VAR be used?"
-  - "Is it offside if you're level?"
-
-### ❤️ Module 5 — Drama Timeline
-- Minute-by-minute emotional sentiment map of 
-  iconic World Cup matches
-- 5 emotion channels: Hope, Tension, Jubilation, 
-  Heartbreak, Anxiety
-- IBM Granite generates cultural narratives for 
-  key emotional peaks
-- Example: *"Baggio's miss in 1994 wasn't just 
-  a statistic. It was the weight of an entire 
-  nation collapsing in Pasadena's heat."*
+| Metric | What it measures |
+| :--- | :--- |
+| **Vision** | Line-of-sight passing lane widths and diagonal channel availability |
+| **Risk** | Expected Threat (xT) reward gain vs probability of interception |
+| **Execution** | Pass/Shot vector accuracy relative to target zones |
+| **Pressure** | Density and proximity of opponent defensive markers surrounding the performer |
+| **Leverage** | Cumulative momentum shift impact of the event on the match outcome |
 
 ---
 
-## 🎨 Design Decisions & Engineering Choices
+## 🛠️ Technical Architecture
 
-### 🎯 Tactics Canvas Focus Area
-To replicate the high-density analytical experience used by professional match-day analysts, the Tactics AI module intentionally utilizes an expansive, uncompressed 2D vector field layout. This ensures that tactical metrics, passing lane geometry, and player movement vectors maintain true, distortion-free spatial scaling relative to the real-world pitch boundaries.
+### Data & Agent Pipeline Flow
+```
+StatsBomb API → Telemetry Parser / RAG index → watsonx.ai client
+                                      ↓
+                           Expected Threat (xT) Model
+                                      ↓
+                           ┌─────────────────────────────────┐
+                           │         Next.js Backend         │
+                           │  REST Endpoints + SSE Streaming │
+                           └──────────────┬──────────────────┘
+                                          ↓
+                           ┌──────────────────────────────────┐
+                           │        React/Next.js UI          │
+                           │  2D Pitch Canvas · SAOT Skeletal │
+                           │  Crucible Pentagon · Chat Engine │
+                           └──────────────────────────────────┘
+                                          ↓
+                           ┌──────────────────────────────────┐
+                           │      IBM Granite (watsonx.ai)     │
+                           │  RAG grounded in FIFA Laws       │
+                           │  via Docling PDF Parser Ingestion│
+                           └──────────────────────────────────┘
+```
 
-### 💀 Skeletal Grid Contrast (VARdict)
-The 29-Point Skeletal Mesh HUD isolates body keypoints against an unlit tracking matrix. This engineering decision eliminates peripheral stadium noise, allowing the system to focus computational clarity purely on centimeter-precision limb coordinates during critical offside evaluations.
+### Frontend-Backend Connection Details
+DECODED operates on a decoupled client-serverless architecture natively integrated within Next.js:
+
+1.  **Telemetry Fetching & Parsing**: On initial mount, the client triggers async fetches to Next.js API endpoints (`/api/statsbomb/matches`, `/api/statsbomb/events`, `/api/statsbomb/lineups`, `/api/statsbomb/freezeframe`). These endpoints pull raw open data from StatsBomb, caching results for fast retrieval.
+2.  **State Sync & Coordinate Translation**: The client receives raw StatsBomb coordinate tuples (x, y on a 120x80 meter scale) and translates them into responsive HTML5 canvas dimensions. When a user drags a player token in the What-If Sandbox, the updated coordinates trigger local React state updates, recalculating expected threat vectors instantly.
+3.  **Agent Orchestration via SSE**: The Ask Decoded chat interface posts conversation threads to `/api/agents/chat`. The backend activates our multi-agent orchestrator:
+    *   It queries a local semantic vector database to fetch relevant clauses (parsed from the FIFA Laws PDF by Docling).
+    *   It routes the user prompt to officiating, tactical, or narrative specialist agents.
+    *   It streams Granite's token-by-token output back to the client interface using **Server-Sent Events (SSE)**, enabling real-time response rendering.
 
 ---
 
 ## 🤖 IBM Tools Used
 
 ### IBM Granite (watsonx.ai)
-`granite-3-8b-instruct` powers all five modules:
-- Tactical breakdown narratives (Tactics)
-- Psychological pressure analysis (Pressure)
-- Legal VAR verdicts (VARdict)
-- Plain-English law translation (Ask the Ref)
-- Cultural sentiment narratives (Drama)
+We deploy `granite-3-8b-instruct` to run all analysis cards and multi-agent chats. When a play is selected, Granite receives computed spatial variables (e.g., "Pressure: 74%, Risk: 81%, open lane coordinates") and writes natural-language tactical breakdowns explaining why the player made that decision.
 
 ### Docling
-Parses the **FIFA Official Laws of the Game 2024** 
-PDF into a structured semantic knowledge base. 
-Powers the Ask the Ref RAG retrieval pipeline — 
-returning exact article matches for any fan query.
-
-### Langflow
-Orchestrates the multi-step AI pipeline across 
-all five modules — managing context injection, 
-RAG retrieval, and Granite inference chains.
+Parses official FIFA Laws of the Game PDFs. Unlike basic PDF text extractors, Docling preserves grid alignments and tables (such as card offence matrices), generating clean data tables that Granite references during RAG lookups to answer complex rules questions.
 
 ---
 
-## 📊 Data Sources
+## 🏆 Judging Criteria Alignment
 
-| Source | Used For |
-|--------|----------|
-| StatsBomb Open Data | Real match events, corners, passing networks |
-| FIFA Laws of the Game 2024 | Ask the Ref RAG (via Docling) |
-| Pre-computed profiles | Pressure moments (Mbappe, Baggio, Zidane) |
-| Historical match data | Drama Timeline sentiment curves |
-
-StatsBomb open data:
-`github.com/statsbomb/open-data`
+| Judging Criteria | DECODED Evidence |
+|---|---|
+| Technical Execution | Multi-agent swarm, real StatsBomb 360, Zod contracts, Truth Anchor, SHA-256 RAG, SSE streaming |
+| Innovation | SAOT skeletal mesh, counterfactual ghost arrows, Voronoi spatial overlay, VARdict too-close-to-call deferral |
+| Challenge Fit | 5 modules covering all 4 challenge themes: explainability, trust, fan understanding, human pressure |
+| Feasibility | Zero-broken offline fallback, pre-computed cache, verifiable at /judges live |
 
 ---
 
-## 🛠️ Tech Stack
+## 🏁 Features & Modules
 
-| Layer | Technology |
-|-------|-----------|
-| Framework | Next.js 14 (App Router) + React |
-| Styling | Tailwind CSS + Custom CSS |
-| Visualization | HTML5 Canvas API |
-| AI | IBM Granite via watsonx.ai |
-| RAG | Docling + semantic search |
-| Icons | Lucide React |
-| Fonts | Teko (headers) + Inter (body) |
-| Data | StatsBomb Open Data API |
+### 🎯 Module 1 — Tactics AI (`/tactics`)
+*   **StatsBomb Spatial Replay Canvas**: Reconstructs real corner kicks and match play sequences from famous World Cup matches using StatsBomb open data.
+*   **Live 2D Pitch Canvas**: Visualizes player runs, target zones, ball trajectories, GK coverage, and expected goals (xG) overlay coordinates.
+*   **What-If Spacing Sandbox**: Drag player tokens dynamically on the pitch canvas to manually test passing options and defensive cover, instantly recalculating threat vectors.
+*   **IBM Granite Breakdown**: Automatically generates natural language narratives detailing why passing channels were available or why a press failed.
+
+### 🧠 Module 2 — Pressure Index (`/pressure`)
+*   **The Crucible Score**: Renders a 5-dimensional psychological fingerprint (Composure, Clutch Capability, Stamina, Crowd Pressure, Experience) measuring a player's mental load at high-stakes World Cup moments.
+*   **Stress Sandbox**: Sliders let users alter crowd sizes, VAR delays, and player fatigue to morph the SVG hexagon diagram in real time.
+*   **Acoustic Wave Visualizer**: Play Moroccan whistles, Argentine drums, or tense silence feeds to see the composure index variables react live.
+*   **Pressure Hall of Fame**: Composes comparative stress rankings (e.g. Mbappé: 9.2, Coman: 9.4, Baggio: 9.8).
+
+### ⚖️ Module 3 — VARdict (`/vardict`)
+*   **SAOT Limb HUD**: Renders the complete 29-point anatomical skeletal joint mesh overlay used by Semi-Automated Offside Technology to centimeter precision.
+*   **Manual Offside Calibrator**: Sliders let users draw offside lines. Calibrating margins within ±3.0cm triggers a `TOO CLOSE TO CALL` warning, highlighting camera precision limits.
+*   **Decision Lab**: Cites official FIFA rulebook articles using IBM Granite to deliver legal verdicts, alongside global fan polls.
+
+### 📖 Module 4 — Ask the Ref (`/laws` or `/ask-decoded`)
+*   **Docling Law Ingestion**: Plain-English queries scan the complete official FIFA Laws of the Game parsed via Docling to preserve tables and spatial clauses.
+*   **RAG Rule Grounding**: IBM Granite translates dense rulebook jargon into friendly, structured responses and highlights exact matching articles.
+*   **Suggested Prompts**: Evaluates classic situations (e.g., scoring directly from throw-ins, handball boundaries, level offsides).
+
+### ❤️ Module 5 — Drama Timeline (`/drama`)
+*   **Sentiment Map**: Minute-by-minute emotional sentiment mapping (Hope, Tension, Jubilation, Heartbreak, Anxiety) for iconic matches.
+*   **Granite Cultural Narratives**: IBM Granite generates storytelling descriptions for dramatic peaks.
 
 ---
 
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js v18+
-- npm or pnpm
+## 🚀 Running Locally
 
 ### Installation
 
 ```bash
-# Clone the repo
+# Clone the repository
 git clone https://github.com/AmanM006/decoded-fifa.git
 cd decoded-fifa
 
 # Install dependencies
 npm install
 
-# Set up environment variables
+# Setup environment credentials
 cp .env.example .env.local
-# Add your watsonx.ai API key
-
-# Run development server
-npm run dev
 ```
 
-Open `http://localhost:3000`
-
 ### Environment Variables
-
+Edit your `.env.local` file:
 ```bash
 WATSONX_API_KEY=your_key_here
 WATSONX_PROJECT_ID=your_project_id
 WATSONX_REGION=us-south
 ```
 
-Offline mode: all modules run on pre-computed 
-synthetic data if API is unavailable. 
-Zero broken states.
+```bash
+# Run local server
+npm run dev
+# App runs at http://localhost:3000
+```
+*Note: If API credentials are not found, the platform enters an offline fallback mode using pre-cached JSON telemetry streams, ensuring zero broken states.*
 
 ---
 
-## 🎯 Why DECODED Wins
+## 🛡️ Honest Limitations & Trust Boundaries
 
-**The challenge asks for:** explainability, trust, 
-fan understanding, human side of the game.
-
-**DECODED delivers:**
-- ✅ Explainability — every feature explains WHY
-- ✅ Trust — VAR reconstruction makes decisions 
-  transparent for the first time
-- ✅ Fan understanding — plain English throughout, 
-  no jargon
-- ✅ Human side — Pressure Index + Drama Timeline 
-  are entirely about human emotion
-- ✅ Cultural context — 48 nations, global stories
-- ✅ IBM tools — Granite + Docling + Langflow 
-  all used meaningfully, not superficially
-
----
-
-## 🏆 Judging Criteria & Technical Audits
-
-We provide direct file verification paths for all our claims to support the judging panel's review process.
-
-### Live Code Verification Paths
-
-| Feature / Claim | File Reference / Source Code Link |
-|:---|:---|
-| **What-if Geometry Calibrator** | [VardictTab.jsx](file:///c:/Users/cheer/Documents/fifa/components/vardict/VardictTab.jsx) / [VerdictCard.jsx](file:///c:/Users/cheer/Documents/fifa/components/vardict/VerdictCard.jsx) |
-| **Granite Guardian Safety Gate** | [route.js](file:///c:/Users/cheer/Documents/fifa/app/api/granite/route.js) (Routes calls to Guardian validation) |
-| **SHA-256 Corpus Check** | [AskTheRef.jsx](file:///c:/Users/cheer/Documents/fifa/components/laws/AskTheRef.jsx) (Integrity check on Laws database) |
-| **Zod Validation Contracts** | [statsbomb.js](file:///c:/Users/cheer/Documents/fifa/lib/statsbomb.js) (Type-safe incoming event checking) |
-| **Diagnostics & Telemetry API** | [route.js](file:///c:/Users/cheer/Documents/fifa/app/api/diagnostic/route.js) / [route.js](file:///c:/Users/cheer/Documents/fifa/app/api/trace/route.js) |
-| **Judges verification dashboard** | [JudgesPanel.jsx](file:///c:/Users/cheer/Documents/fifa/components/JudgesPanel.jsx) |
-
----
-
-## 🎯 Step-by-Step Judge Demo Scenarios
-
-Verify system claims live in seconds by following these walkthroughs:
-
-### 1. The Offside Calibrator & 'Too Close to Call' State
-*   **Path**: Navigate to `/vardict` or click "VARdict" in the nav.
-*   **Action**: Select the quiz answer "Controversial" to unlock the SAOT skeletal mesh dashboard. Locate the **Manual offside line calibrator** slider.
-*   **Proof**: Drag the slider to adjust the offside margin. If you calibrate the gap to be **within ±3.0cm** (the physical resolution threshold of professional tracking cameras), notice the system transition into a yellow `TOO CLOSE TO CALL` state. It displays an ECE spatial uncertainty warning and instructs the referee to defer to the field call.
-
-### 2. Granite Guardian Safety Intercept
-*   **Path**: Navigate to `/judges` or click "About" -> "Open Judges Audit panel".
-*   **Action**: Locate the Granite Guardian Fail-Closed card and click **"Query unsafe prompt"**.
-*   **Proof**: The system simulates an out-of-bounds user response that is intercepted by Granite Guardian. The generated output is hidden and the interface displays a safe official FIFA law degradation floor, proving the system fails closed securely.
-
-### 3. Self-Healing Telemetry Validation
-*   **Path**: Navigate to `/judges`.
-*   **Action**: In the Zod schema card, click **"Inject Corrupt"** followed by **"Validate Schema"**.
-*   **Proof**: Watch the validation contract catch the datatype mismatch (string player ID, singleton coordinates array) and block the corrupt payload from reaching the canvas. It signals the auto-healing preset to prevent client-side crashes.
-
----
-
-## 🛡️ Honest Limits Disclosures & Trust Boundaries
-
-*   **Camera Precision (SAOT)**: Professional optical tracking systems operating at 50Hz have a native spatial accuracy limit of ±3.0cm. Claims of absolute accuracy are false; we disclose this uncertainty in the VARdict module.
-*   **Stress Simulation**: The Crucible Score venue modifier operates on empirical psychological multipliers (+0.8 home pressure, +0.4 hostile away noise). It models situational pressure rather than predicting actual physical performance.
-*   **Simulated Telemetry**: Tracing telemetry spans inside the Judges panel are driven by a mock trace generator (`/api/trace`) modeling average timings (Docling: 120ms, Granite: 1450ms) to demonstrate operational pipeline architectures.
+*   **Camera Precision Limits**: Professional optical tracking cameras have a physical resolution boundary of **±3.0cm**. We explicitly disclose this limitation in the VARdict slider tool; we do not claim sub-millimeter offside certainty.
+*   **Model Selection**: We utilize `granite-3-8b-instruct` rather than larger models due to regional watsonx.ai capacity limits.
+*   **Trace Simulation**: The OpenTelemetry spans visible in the `/judges` diagnostics panel are simulated metrics representing average processing intervals (e.g. Docling: 120ms, Granite: 1450ms) to demonstrate operational pipeline layouts.
 
 ---
 
 ## 📄 License
 
-MIT — Built for IBM SkillsBuild AI Builders Challenge · June 2026
+MIT — Developed for the IBM SkillsBuild AI Builders Challenge · June/July 2026
