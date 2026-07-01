@@ -2,7 +2,7 @@
 
 > *"VAR is a system of cameras. Docling is a system of rules. DECODED makes the difference visible."*
 
-🚀 **Live Deployment URL**: [https://fifa-pink.vercel.app](https://fifa-pink.vercel.app)  
+🚀 **Live Deployment URL**: [https://fifa-decoded.vercel.app/](https://fifa-decoded.vercel.app/)  
 🎥 **Platform Demo Video**: [https://github.com/AmanM006/decoded-fifa](https://github.com/AmanM006/decoded-fifa) *(Note: replace with video URL before final submission)*
 
 ![IBM Granite](https://img.shields.io/badge/IBM-Granite-052FAD)
