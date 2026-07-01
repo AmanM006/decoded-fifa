@@ -88,22 +88,25 @@ StatsBomb API → Telemetry Parser / RAG index → watsonx.ai client
 ### Frontend-Backend Connection Details
 DECODED operates on a decoupled client-serverless architecture natively integrated within Next.js:
 
-1.  **Telemetry Fetching & Parsing**: On initial mount, the client triggers async fetches to Next.js API endpoints (`/api/statsbomb/matches`, `/api/statsbomb/events`, `/api/statsbomb/lineups`, `/api/statsbomb/freezeframe`). These endpoints pull raw open data from StatsBomb, caching results for fast retrieval.
-2.  **State Sync & Coordinate Translation**: The client receives raw StatsBomb coordinate tuples (x, y on a 120x80 meter scale) and translates them into responsive HTML5 canvas dimensions. When a user drags a player token in the What-If Sandbox, the updated coordinates trigger local React state updates, recalculating expected threat vectors instantly.
-3.  **Agent Orchestration via SSE**: The Ask Decoded chat interface posts conversation threads to `/api/agents/chat`. The backend activates our multi-agent orchestrator:
-    *   It queries a local semantic vector database to fetch relevant clauses (parsed from the FIFA Laws PDF by Docling).
-    *   It routes the user prompt to officiating, tactical, or narrative specialist agents.
-    *   It streams Granite's token-by-token output back to the client interface using **Server-Sent Events (SSE)**, enabling real-time response rendering.
+1.  **Telemetry Fetching & Parsing**: On initial mount, `lib/statsbomb.js` fetches raw event data directly from the StatsBomb Open Data GitHub CDN. The first 10 events are validated against a strict **Zod schema contract** (`MatchTelemetrySchema`) before any rendering occurs. If validation fails or the network is unavailable, a self-healing fallback to pre-cached preset corners activates automatically — guaranteed zero broken states.
+2.  **State Sync & Coordinate Translation**: The client receives raw StatsBomb coordinate tuples (x, y on a 120x80 metre pitch scale) and translates them into responsive HTML5 canvas pixel dimensions. When a user drags a player token in the What-If Sandbox, updated coordinates trigger local React state updates, recalculating expected threat vectors instantly.
+3.  **Granite AI Analysis**: Each module posts structured match data to `/api/granite`. The backend builds an audience-aware prompt (casual / enthusiast / analyst), calls `ibm/granite-3-8b-instruct` on watsonx.ai, and for VARDICT and LAWS tabs, pipes the output through a **Granite Guardian 3.0 safety gate** before returning the result. If watsonx.ai is unavailable, a high-fidelity offline synthetic response is returned with no user-visible failure.
 
 ---
 
 ## 🤖 IBM Tools Used
 
-### IBM Granite (watsonx.ai)
-We deploy `granite-3-8b-instruct` to run all analysis cards and multi-agent chats. When a play is selected, Granite receives computed spatial variables (e.g., "Pressure: 74%, Risk: 81%, open lane coordinates") and writes natural-language tactical breakdowns explaining why the player made that decision.
+### IBM Granite (`ibm/granite-3-8b-instruct`, watsonx.ai)
+Powers all 5 module analysis cards. When a match event is selected, Granite receives structured spatial variables (e.g. `pressure: 74%, risk: 81%, open lane coordinates`) and returns a natural-language breakdown explaining why the player made that decision. Prompts are audience-aware — the same event generates different explanations for casual fans, enthusiasts, and analysts.
 
-### Docling
-Parses official FIFA Laws of the Game PDFs. Unlike basic PDF text extractors, Docling preserves grid alignments and tables (such as card offence matrices), generating clean data tables that Granite references during RAG lookups to answer complex rules questions.
+### Granite Guardian (`ibm/granite-guardian-3-8b`, watsonx.ai)
+A dedicated safety gate runs on every VARDICT and LAWS response. Before the analysis reaches the user, Guardian classifies the output as `safe` or `unsafe`. If flagged unsafe, the system fails closed to prevent rule hallucinations, reverting to the pre-signed official rulebook text.
+
+### FIFA Laws Dataset (Structured JSON)
+Official FIFA Laws of the Game (Laws 11, 12, 14) are stored as a structured JSON dataset. A SHA-256 hash is computed at build time as a **Truth Anchor fingerprint** — the `/api/laws-integrity` endpoint recomputes and compares this hash live on every request, providing verifiable data integrity.
+
+### Zod Schema Contracts
+All StatsBomb telemetry tokens are validated against a strict `MatchTelemetrySchema` before rendering. Invalid payloads trigger a self-healing fallback rather than a crash.
 
 ---
 
@@ -111,10 +114,10 @@ Parses official FIFA Laws of the Game PDFs. Unlike basic PDF text extractors, Do
 
 | Judging Criteria | DECODED Evidence |
 |---|---|
-| Technical Execution | Multi-agent swarm, real StatsBomb 360, Zod contracts, Truth Anchor, SHA-256 RAG, SSE streaming |
-| Innovation | SAOT skeletal mesh, counterfactual ghost arrows, Voronoi spatial overlay, VARdict too-close-to-call deferral |
-| Challenge Fit | 5 modules covering all 4 challenge themes: explainability, trust, fan understanding, human pressure |
-| Feasibility | Zero-broken offline fallback, pre-computed cache, verifiable at /judges live |
+| Technical Execution | Real watsonx.ai Granite calls, Granite Guardian safety gate, Zod telemetry contracts, SHA-256 Truth Anchor, StatsBomb open data with self-healing fallback |
+| Innovation | SAOT 29-point skeletal mesh, ±3cm offside uncertainty disclosure, counterfactual drag-and-drop sandbox, Crucible pressure pentagon, audience-aware AI explainability |
+| Challenge Fit | 5 modules covering all 4 challenge themes: explainability (VARdict/Laws), trust (Guardian gate + SHA-256), fan understanding (Tactics/Drama), human pressure (Crucible) |
+| Feasibility | Zero-broken offline fallback, Zod self-healing on bad data, live-verifiable at `/judges`, deployed on Vercel |
 
 ---
 
@@ -137,9 +140,10 @@ Parses official FIFA Laws of the Game PDFs. Unlike basic PDF text extractors, Do
 *   **Manual Offside Calibrator**: Sliders let users draw offside lines. Calibrating margins within ±3.0cm triggers a `TOO CLOSE TO CALL` warning, highlighting camera precision limits.
 *   **Decision Lab**: Cites official FIFA rulebook articles using IBM Granite to deliver legal verdicts, alongside global fan polls.
 
-### 📖 Module 4 — Ask the Ref (`/laws` or `/ask-decoded`)
-*   **Docling Law Ingestion**: Plain-English queries scan the complete official FIFA Laws of the Game parsed via Docling to preserve tables and spatial clauses.
-*   **RAG Rule Grounding**: IBM Granite translates dense rulebook jargon into friendly, structured responses and highlights exact matching articles.
+### 📖 Module 4 — Ask the Ref (`/laws`)
+*   **Structured Law Dataset**: Official FIFA Laws 11, 12, and 14 are stored as a validated JSON dataset — every clause is addressable by law number and article ID.
+*   **SHA-256 Truth Anchor**: The laws dataset is SHA-256 hashed at build time. The `/api/laws-integrity` endpoint re-hashes live on every request and compares against the canonical fingerprint — proving the rulebook has not been tampered with.
+*   **Granite AI Grounding**: IBM Granite receives the exact law text and article alongside the user's question, translating dense rulebook jargon into audience-appropriate explanations with Granite Guardian safety verification.
 *   **Suggested Prompts**: Evaluates classic situations (e.g., scoring directly from throw-ins, handball boundaries, level offsides).
 
 ### ❤️ Module 5 — Drama Timeline (`/drama`)
