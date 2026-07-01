@@ -90,14 +90,17 @@ DECODED operates on a decoupled client-serverless architecture natively integrat
 
 1.  **Telemetry Fetching & Parsing**: On initial mount, `lib/statsbomb.js` fetches raw event data directly from the StatsBomb Open Data GitHub CDN. The first 10 events are validated against a strict **Zod schema contract** (`MatchTelemetrySchema`) before any rendering occurs. If validation fails or the network is unavailable, a self-healing fallback to pre-cached preset corners activates automatically — guaranteed zero broken states.
 2.  **State Sync & Coordinate Translation**: The client receives raw StatsBomb coordinate tuples (x, y on a 120x80 metre pitch scale) and translates them into responsive HTML5 canvas pixel dimensions. When a user drags a player token in the What-If Sandbox, updated coordinates trigger local React state updates, recalculating expected threat vectors instantly.
-3.  **Granite AI Analysis**: Each module posts structured match data to `/api/granite`. The backend builds an audience-aware prompt (casual / enthusiast / analyst), calls `ibm/granite-3-8b-instruct` on watsonx.ai, and for VARDICT and LAWS tabs, pipes the output through a **Granite Guardian 3.0 safety gate** before returning the result. If watsonx.ai is unavailable, a high-fidelity offline synthetic response is returned with no user-visible failure.
+3.  **Real-Time SSE Streaming**: The client posts structured match data to the Next.js backend at `/api/granite/stream`. The backend constructs an audience-aware prompt (casual / enthusiast / analyst), establishes a connection to the `text_generation_stream` endpoint of watsonx.ai, and pipes the tokens back to the client in real time using **Server-Sent Events (SSE)**. For offside (VARDICT) and rules (LAWS) tabs, a safety classification via **Granite Guardian 3.0** is run on the accumulated text. If the connection fails or credentials are absent, the API falls back to a simulated token-by-token stream.
 
 ---
 
 ## 🤖 IBM Tools Used
 
 ### IBM Granite (`ibm/granite-3-8b-instruct`, watsonx.ai)
-Powers all 5 module analysis cards. When a match event is selected, Granite receives structured spatial variables (e.g. `pressure: 74%, risk: 81%, open lane coordinates`) and returns a natural-language breakdown explaining why the player made that decision. Prompts are audience-aware — the same event generates different explanations for casual fans, enthusiasts, and analysts.
+Powers all 5 module analysis cards. When an event is queried, Granite receives structured spatial variables (e.g. `pressure: 74%, risk: 81%`) and explains player decision-making. Responses are streamed token-by-token using **Server-Sent Events (SSE)**. Prompts are audience-aware — generating different explanations for casual fans, enthusiasts, and analysts.
+
+### Docling (IBM PDF Document Converter)
+Docling was used offline to extract structure, headers, and tables from the official FIFA Laws of the Game PDF. This output was parsed into our static RAG dataset (`data/laws.js`), keeping the build light and deployment-ready while retaining layout integrity. We bundle the pipeline in `scratch/run_docling_pipeline.py` to verify ingestion correctness.
 
 ### Granite Guardian (`ibm/granite-guardian-3-8b`, watsonx.ai)
 A dedicated safety gate runs on every VARDICT and LAWS response. Before the analysis reaches the user, Guardian classifies the output as `safe` or `unsafe`. If flagged unsafe, the system fails closed to prevent rule hallucinations, reverting to the pre-signed official rulebook text.
@@ -114,10 +117,10 @@ All StatsBomb telemetry tokens are validated against a strict `MatchTelemetrySch
 
 | Judging Criteria | DECODED Evidence |
 |---|---|
-| Technical Execution | Real watsonx.ai Granite calls, Granite Guardian safety gate, Zod telemetry contracts, SHA-256 Truth Anchor, StatsBomb open data with self-healing fallback |
+| Technical Execution | Real watsonx.ai Granite streaming, SSE token streaming, Granite Guardian safety gate, Zod telemetry contracts, SHA-256 Truth Anchor, StatsBomb open data with self-healing fallback |
 | Innovation | SAOT 29-point skeletal mesh, ±3cm offside uncertainty disclosure, counterfactual drag-and-drop sandbox, Crucible pressure pentagon, audience-aware AI explainability |
 | Challenge Fit | 5 modules covering all 4 challenge themes: explainability (VARdict/Laws), trust (Guardian gate + SHA-256), fan understanding (Tactics/Drama), human pressure (Crucible) |
-| Feasibility | Zero-broken offline fallback, Zod self-healing on bad data, live-verifiable at `/judges`, deployed on Vercel |
+| Feasibility | Zero-broken offline fallback, Zod self-healing on bad data, Docling build pipeline, live-verifiable at `/judges`, deployed on Vercel |
 
 ---
 
